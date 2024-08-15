@@ -20,4 +20,3 @@ def getconnection():
         return engine
     except SQLAlchemyError as e:
         print(f'Error: {e}')
-getconnection()
