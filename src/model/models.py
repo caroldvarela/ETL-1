@@ -2,23 +2,24 @@ from sqlalchemy import Column, Integer, String, Date
 from sqlalchemy.orm import declarative_base
 
 BASE = declarative_base()
-MAX_STRING_SIZE = 100
+
 
 class Staging(BASE):
     
     __tablename__ = 'Staging'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    WorkYear = Column(Integer, nullable=False)
-    ExperienceLevel = Column(String(MAX_STRING_SIZE), nullable=False)
-    EmploymentType = Column(String(MAX_STRING_SIZE), nullable=False)
-    JobTitle = Column(String(MAX_STRING_SIZE), nullable=False)
-    Salary =  Column(Integer, primary_key=True, autoincrement=True)
-    SalaryCurrency = Column(String(MAX_STRING_SIZE), nullable=False)
-    SalaryInUSD =  Column(Integer, primary_key=True, autoincrement=True)
-    EmployeeResidence = Column(String(MAX_STRING_SIZE), nullable=False)
-    RemoteRatio =  Column(Integer, primary_key=True, autoincrement=True)
-    CompanyLocation = Column(String(MAX_STRING_SIZE), nullable=False)
-    CompanySize = Column(String(MAX_STRING_SIZE), nullable=False)
-
+    age = Column(Integer, nullable=False)
+    gender = Column(Integer, nullable=False)
+    height = Column(Integer, nullable=False)
+    weight = Column(float, nullable=False)
+    ap_hi = Column(Integer, nullable=False)
+    ap_lo = Column(Integer, nullable=False)
+    cholesterol = Column(Integer, nullable=False)
+    gluc = Column(Integer, nullable=False)
+    smoke = Column(Integer, nullable=False)
+    alco = Column(Integer, nullable=False)
+    active = Column(Integer, nullable=False)
+    cardio = Column(Integer, nullable=False)
+    
     def __str__ (self):
         return f" Table: {self.Staging.__table__}"
