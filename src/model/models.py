@@ -1,10 +1,10 @@
-from sqlalchemy import Column, Integer, String, Float, Date, Boolean
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
 class CardioTrain(Base):
-    __tablename__ = 'cardio_train'
+    __tablename__ = 'CardioTrain'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     age = Column(Integer, nullable=False)
@@ -15,13 +15,13 @@ class CardioTrain(Base):
     ap_lo = Column(Integer, nullable=False)  # Presión arterial diastólica
     cholesterol = Column(Integer, nullable=False)
     gluc = Column(Integer, nullable=False)
-    smoke = Column(Boolean, nullable=False)
-    alco = Column(Boolean, nullable=False)
-    active = Column(Boolean, nullable=False)
-    cardio = Column(Boolean, nullable=False)
+    smoke = Column(Integer, nullable=False)
+    alco = Column(Integer, nullable=False)
+    active = Column(Integer, nullable=False)
+    cardio = Column(Integer, nullable=False)
 
     def __str__(self):
-        return f"<CardioTrain(id={self.id}, age={self.age}, gender={self.gender})>"
+        return f"table create"
 
 
 class CauseOfDeaths(Base):
