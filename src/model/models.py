@@ -29,10 +29,10 @@ class CauseOfDeaths(BASE):
     __tablename__ = 'CauseOfDeaths'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    country = Column(String, nullable=False)
-    year = Column(Integer, nullable=False)
-    cause = Column(String, nullable=False)
-    deaths = Column(Integer, nullable=False)
+    Country = Column(String(40), nullable=False)
+    Year = Column(Integer, nullable=False)
+    Cardiovascular = Column(Integer, nullable=False)
+    TotalDeaths = Column(Integer, nullable=False)
 
     def __str__(self):
         return f"<CauseOfDeaths(id={self.id}, country={self.country}, year={self.year})>"

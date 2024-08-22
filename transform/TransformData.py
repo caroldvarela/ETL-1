@@ -7,6 +7,7 @@ class DataTransform:
 
         self.df = pd.read_csv(file, sep=";")
     
+    
     def  gender_by_category(self) -> None:
         self.gender_to_category = {
             1 : 'Female',
@@ -33,9 +34,8 @@ class DataTransform:
 
     def IMC(self) -> None:
 
-        self.df['IMC'] = round(self.df['weight'] / (self.df['height'] ** 2), 2)
+        self.df['IMC'] = round(self.df['weight'] / ((self.df['height']/100 )** 2), 2)
         self.df['IMC'] = self.df['IMC'].astype(float)
-
 
     def days_to_age(self) -> None:
 
@@ -76,3 +76,31 @@ class DataTransform:
         self.df.drop(columns=['cholesterol'], inplace=True)
 
         return cholesterol_df
+
+    
+
+class DataTransformCauseOfDeaths:
+    def __init__(self, file):
+        self.df = pd.read_csv(file, sep=",")
+
+    def insert_id(self) -> None:
+        """_summary_
+        """
+        self.df['id'] = range(1,len(self.df)+1)
+        
+    def drop_code(self) -> None:
+
+        self.df.drop(columns=['Code'], inplace=True) 
+
+
+    def total_deaths(self) -> None:
+
+
+        self.df['TotalDeaths'] = self.df.iloc[:, 2:].sum(axis=1)
+        print(self.df.iloc[:, 2:].columns)
+
+        first_columns = self.df.columns[:2]
+
+        self.df = self.df[first_columns.tolist() + ['TotalDeaths'] + ['Cardiovascular']]
+
+
