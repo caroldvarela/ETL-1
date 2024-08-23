@@ -97,7 +97,6 @@ class DataTransformCauseOfDeaths:
 
 
         self.df['TotalDeaths'] = self.df.iloc[:, 2:].sum(axis=1)
-        print(self.df.iloc[:, 2:].columns)
 
         first_columns = self.df.columns[:2]
 
