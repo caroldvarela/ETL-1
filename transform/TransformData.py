@@ -28,7 +28,7 @@ class DataTransform:
         self.gluc_to_category = {
             1: 'normal',
             2: 'above normal',
-            3: 'well'
+            3: 'well above normal'
         }
         self.df['gluc'] = self.df['gluc'].map(self.gluc_to_category)
 
