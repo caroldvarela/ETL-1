@@ -46,7 +46,7 @@ class CardioTrainNormalize(BASE):
     gender = Column(String(MAX_STRING_SIZE), nullable=False)
     height = Column(Integer, nullable=False)
     weight = Column(Float, nullable=False)
-    IMC = Column(Float, nullable=False)
+    bmi = Column(Float, nullable=False)
     ap_hi = Column(Integer, nullable=False)  # Presión arterial sistólica
     ap_lo = Column(Integer, nullable=False)  # Presión arterial diastólica
     cholesterolID = Column(Integer, ForeignKey('CholesterolTypes.id'), nullable=False)
@@ -54,6 +54,9 @@ class CardioTrainNormalize(BASE):
     smoke = Column(Integer, nullable=False)
     alco = Column(Integer, nullable=False)
     active = Column(Integer, nullable=False)
+    bmi_class = Column(Integer, nullable=False)
+    bp_cat = Column(Integer, nullable=False)
+    pulse_press = Column(Integer, nullable=False)
     cardio = Column(Integer, nullable=False)
 
     cholesterol = relationship("CholesterolTypes", back_populates="cardio")

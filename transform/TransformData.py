@@ -32,10 +32,10 @@ class DataTransform:
         }
         self.df['gluc'] = self.df['gluc'].map(self.gluc_to_category)
 
-    def IMC(self) -> None:
+    def bmi(self) -> None:
 
-        self.df['IMC'] = round(self.df['weight'] / ((self.df['height']/100 )** 2), 2)
-        self.df['IMC'] = self.df['IMC'].astype(float)
+        self.df['bmi'] = round(self.df['weight'] / ((self.df['height']/100 )** 2), 2)
+        self.df['bmi'] = self.df['bmi'].astype(float)
 
     def days_to_age(self) -> None:
 
@@ -76,6 +76,53 @@ class DataTransform:
         self.df.drop(columns=['cholesterol'], inplace=True)
 
         return cholesterol_df
+    
+    def StandardizeBloodPressure(self) -> None:
+        self.df['ap_hi'] = self.df['ap_hi'].abs()
+        self.df['ap_lo'] = self.df['ap_lo'].abs()
+        self.df.drop(self.df[self.df["ap_hi"] < 80].index, inplace=True)
+        self.df.drop(self.df[self.df["ap_hi"] > 250].index, inplace=True)
+        self.df.drop(self.df[self.df["ap_lo"] < 50].index, inplace=True)
+        self.df.drop(self.df[self.df["ap_lo"] > 150].index, inplace=True) 
+        # Remove records where systolic equals diastolic
+        self.df.drop(self.df[self.df["ap_hi"] == self.df["ap_lo"]].index, inplace=True)
+      
+    def CategorizeBMI(self) -> None:
+        conditions = [
+            (self.df["bmi"] <= 15),
+            (self.df["bmi"] > 15) & (self.df["bmi"] <= 18.5),
+            (self.df["bmi"] > 18.5) & (self.df["bmi"] <= 25),
+            (self.df["bmi"] > 25) & (self.df["bmi"] <= 30),
+            (self.df["bmi"] > 30) & (self.df["bmi"] <= 35),
+            (self.df["bmi"] > 35) & (self.df["bmi"] <= 40),
+            (self.df["bmi"] > 40)
+        ]
+        bmi_class = [0, 1, 2, 3, 4, 5, 6]
+        self.df["bmi_class"] = np.select(conditions, bmi_class)
+    
+    def categorize_blood_pressure(self) -> None:
+
+        systolic = self.df['ap_hi']
+        diastolic = self.df['ap_lo']
+
+        conditions = [
+            (systolic < 120) & (diastolic < 80),
+            (systolic < 130) & (diastolic < 85),
+            ((systolic >= 130) & (systolic <= 139)) | ((diastolic >= 85) & (diastolic <= 89)),
+            ((systolic >= 140) & (systolic <= 159)) | ((diastolic >= 90) & (diastolic <= 99)),
+            ((systolic >= 160) & (systolic <= 179)) | ((diastolic >= 100) & (diastolic <= 109)),
+            (systolic >= 180) | (diastolic >= 110),
+            (systolic >= 140) & (systolic <= 160) & (diastolic < 90),
+            (systolic > 160) & (diastolic < 90)
+        ]
+
+        bp_categories = [0, 1, 2, 3, 4, 5, 6, 7]
+
+        self.df['bp_cat'] = np.select(conditions, bp_categories, default=-1)
+
+    def  CalculatePulsePressure(self) -> None:
+        self.df["pulse_press"] = self.df["ap_hi"] - self.df["ap_lo"]
+
 
     
 
