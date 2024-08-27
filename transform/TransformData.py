@@ -99,26 +99,22 @@ class DataTransform:
         ]
         bmi_class = [0, 1, 2, 3, 4, 5, 6]
         self.df["bmi_class"] = np.select(conditions, bmi_class)
-    
+
     def categorize_blood_pressure(self) -> None:
-
-        systolic = self.df['ap_hi']
-        diastolic = self.df['ap_lo']
-
-        conditions = [
-            (systolic < 120) & (diastolic < 80),
-            (systolic < 130) & (diastolic < 85),
-            ((systolic >= 130) & (systolic <= 139)) | ((diastolic >= 85) & (diastolic <= 89)),
-            ((systolic >= 140) & (systolic <= 159)) | ((diastolic >= 90) & (diastolic <= 99)),
-            ((systolic >= 160) & (systolic <= 179)) | ((diastolic >= 100) & (diastolic <= 109)),
-            (systolic >= 180) | (diastolic >= 110),
-            (systolic >= 140) & (systolic <= 160) & (diastolic < 90),
-            (systolic > 160) & (diastolic < 90)
-        ]
-
-        bp_categories = [0, 1, 2, 3, 4, 5, 6, 7]
-
-        self.df['bp_cat'] = np.select(conditions, bp_categories, default=-1)
+        def classify_blood_pressure(row):
+            if row['ap_hi'] < 120 and row['ap_lo'] < 80:
+                return 1  # NORMAL
+            elif 120 <= row['ap_hi'] <= 129 and row['ap_lo'] < 80:
+                return 2  # ELEVATED
+            elif (130 <= row['ap_hi'] <= 139) or (80 <= row['ap_lo'] <= 89):
+                return 3  # HIGH BLOOD PRESSURE STAGE 1
+            elif (140 <= row['ap_hi'] <= 180) or (90 <= row['ap_lo'] <= 120):
+                return 4  # HIGH BLOOD PRESSURE STAGE 2
+            elif row['ap_hi'] > 180 or row['ap_lo'] > 120:
+                return 5  # HYPERTENSIVE CRISIS
+            else:
+                return None  
+        self.df['blood_pressure'] = self.df.apply(classify_blood_pressure, axis=1)
 
     def  CalculatePulsePressure(self) -> None:
         self.df["pulse_press"] = self.df["ap_hi"] - self.df["ap_lo"]

@@ -55,7 +55,7 @@ class CardioTrainNormalize(BASE):
     alco = Column(Integer, nullable=False)
     active = Column(Integer, nullable=False)
     bmi_class = Column(Integer, nullable=False)
-    bp_cat = Column(Integer, nullable=False)
+    blood_pressure = Column(Integer, nullable=False)
     pulse_press = Column(Integer, nullable=False)
     cardio = Column(Integer, nullable=False)
 
