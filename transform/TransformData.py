@@ -131,11 +131,6 @@ class DataTransformCauseOfDeaths:
         """
         self.df['id'] = range(1,len(self.df)+1)
         
-    def drop_code(self) -> None:
-
-        self.df.drop(columns=['Code'], inplace=True) 
-
-
     def total_deaths(self) -> None:
 
 
