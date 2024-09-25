@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 
 BASE = declarative_base()
-MAX_STRING_SIZE = 20
+MAX_STRING_SIZE = 50
 
 class CardioTrain(BASE):
     __tablename__ = 'CardioTrain'
@@ -29,13 +29,40 @@ class CauseOfDeaths(BASE):
     __tablename__ = 'CauseOfDeaths'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    Country = Column(String(40), nullable=False)
-    Year = Column(Integer, nullable=False)
+    CountryID = Column(Integer, ForeignKey('Countries.id'), nullable=False)
+    YearID = Column(Integer, ForeignKey('Year.id'), nullable=False)
     Cardiovascular = Column(Integer, nullable=False)
     TotalDeaths = Column(Integer, nullable=False)
 
+    country = relationship("Countries", back_populates="causeofdeaths")
+    year = relationship("Year", back_populates="causeofdeaths")
+
     def __str__(self):
         return f"<CauseOfDeaths(id={self.id}, country={self.country}, year={self.year})>"
+
+class Countries(BASE):
+    __tablename__ = 'Countries'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    Country = Column(String(40), nullable=False)
+    Code = Column(String(3), nullable=False)
+
+    causeofdeaths = relationship("CauseOfDeaths", back_populates="country")
+
+    def __str__(self):
+        return f"<CauseOfDeaths(id={self.id})>"
+
+class Year(BASE):
+    __tablename__ = 'Year'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    year = Column(Integer, nullable=False)
+    decade = Column(Integer, nullable=False)
+
+    causeofdeaths = relationship("CauseOfDeaths", back_populates="year")
+
+    def __str__(self):
+        return f"<CauseOfDeaths(id={self.id})>"
 
 
 class CardioTrainNormalize(BASE):
@@ -43,7 +70,7 @@ class CardioTrainNormalize(BASE):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     age = Column(Integer, nullable=False)
-    gender = Column(String(MAX_STRING_SIZE), nullable=False)
+    genderID = Column(Integer, ForeignKey('Gender.id'), nullable=False)
     height = Column(Integer, nullable=False)
     weight = Column(Float, nullable=False)
     bmi = Column(Float, nullable=False)
@@ -51,20 +78,31 @@ class CardioTrainNormalize(BASE):
     ap_lo = Column(Integer, nullable=False)  # Presión arterial diastólica
     cholesterolID = Column(Integer, ForeignKey('CholesterolTypes.id'), nullable=False)
     glucID = Column(Integer, ForeignKey('GlucoseTypes.id'), nullable=False)
-    smoke = Column(Integer, nullable=False)
-    alco = Column(Integer, nullable=False)
-    active = Column(Integer, nullable=False)
-    bmi_class = Column(Integer, nullable=False)
-    blood_pressure = Column(Integer, nullable=False)
+    lifestyleID = Column(Integer, ForeignKey('LifeStyle.id'), nullable=False)
+    bmi_classID = Column(Integer, ForeignKey('BMIClass.id'), nullable=False)
     pulse_press = Column(Integer, nullable=False)
+    BPCategoryId = Column(Integer, ForeignKey('BloodPreasureCategories.id'), nullable=False)
     cardio = Column(Integer, nullable=False)
 
+    gender = relationship("Gender", back_populates="cardio")
     cholesterol = relationship("CholesterolTypes", back_populates="cardio")
     glucose = relationship("GlucoseTypes", back_populates="cardio")
+    lifestyle = relationship("LifeStyle", back_populates="cardio")
+    bmiclass = relationship("BMIClass", back_populates="cardio")
+    bp_categorie = relationship("BloodPreasureCategories", back_populates="cardio")
 
     def __str__(self):
         return f"table create"
 
+class Gender(BASE):
+    __tablename__ = 'Gender'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    gender = Column(String(MAX_STRING_SIZE), nullable=False)
+    
+    cardio = relationship("CardioTrainNormalize", back_populates="gender")
+
+    def __str__ (self):
+        return f" Table: {self.Gender.__table__}"
 
 class CholesterolTypes(BASE):
     __tablename__ = 'CholesterolTypes'
@@ -74,7 +112,7 @@ class CholesterolTypes(BASE):
     cardio = relationship("CardioTrainNormalize", back_populates="cholesterol")
 
     def __str__ (self):
-        return f" Table: {self.Countries.__table__}"
+        return f" Table: {self.CholesterolTypes.__table__}"
 
 class GlucoseTypes(BASE):
     __tablename__ = 'GlucoseTypes'
@@ -84,6 +122,37 @@ class GlucoseTypes(BASE):
     cardio = relationship("CardioTrainNormalize", back_populates="glucose")
 
     def __str__ (self):
-        return f" Table: {self.Countries.__table__}"
+        return f" Table: {self.GlucoseTypes.__table__}"
+
+class LifeStyle(BASE):
+    __tablename__ = 'LifeStyle'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    smoke = Column(Integer, nullable=False)
+    alco = Column(Integer, nullable=False)
+    active = Column(Integer, nullable=False)
     
+    cardio = relationship("CardioTrainNormalize", back_populates="lifestyle")
+
+    def __str__ (self):
+        return f" Table: {self.LifeStyle.__table__}"
+
+class BMIClass(BASE):
+    __tablename__ = 'BMIClass'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    category = Column(String(MAX_STRING_SIZE), nullable=False)
+    
+    cardio = relationship("CardioTrainNormalize", back_populates="bmiclass")
+
+    def __str__ (self):
+        return f" Table: {self.BMI.__table__}"
+
+class BloodPreasureCategories(BASE):
+    __tablename__ = 'BloodPreasureCategories'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    category = Column(String(MAX_STRING_SIZE), nullable=False)
+    
+    cardio = relationship("CardioTrainNormalize", back_populates="bp_categorie")
+
+    def __str__ (self):
+        return f" Table: {self.BloodPreasureCategories.__table__}"
 
