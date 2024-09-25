@@ -73,8 +73,3 @@ def DimensionalModel(dfCardio, dfDeaths):
 
     fileDeaths.df.to_sql('CauseOfDeaths', con=engine, if_exists='append', index=False)
 
-
-df1 = pd.read_csv('./data/cardio_train.csv', sep=';')
-df2 = pd.read_csv('./data/cause_of_deaths.csv')
-    
-DimensionalModel(df1,df2)
