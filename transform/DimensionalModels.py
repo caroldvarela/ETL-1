@@ -12,9 +12,13 @@ from src.database.dbconnection import getconnection
 from sqlalchemy.orm import sessionmaker
 
 def DimensionalModel(dfCardio, dfDeaths):
+
+    # Get engine from sqlalchemy
     engine = getconnection()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
+    # Create Tables from Cardio dimension
 
     CreateTableCardio(BloodPreasureCategories, 'BloodPreasureCategories', engine)
     CreateTableCardio(BMIClass, 'BMIClass', engine)
@@ -23,6 +27,8 @@ def DimensionalModel(dfCardio, dfDeaths):
     CreateTableCardio(CholesterolTypes, 'CholesterolTypes', engine)
     CreateTableCardio(Gender, 'Gender', engine)
     CreateTableCardio(CardioTrainNormalize, 'CardioTrainNormalize', engine)
+
+    # Transformations
 
     fileCardio = DataTransform(dfCardio)
     fileCardio.gender_by_category()
@@ -35,6 +41,8 @@ def DimensionalModel(dfCardio, dfDeaths):
     fileCardio.categorize_blood_pressure()
     fileCardio.CalculatePulsePressure()
 
+    # Create Dimensions
+
     transform_gluc = fileCardio.nomalize_gluc()
     transform_cholesterol = fileCardio.normalize_cholesterol()
     transform_gender = fileCardio.normalize_gender()
@@ -43,7 +51,7 @@ def DimensionalModel(dfCardio, dfDeaths):
     transform_lifestyle = fileCardio.normalize_lifestyle()
     
 
-    
+    # Save the data into the tables
     transform_gluc.to_sql('GlucoseTypes', con=engine, if_exists='append', index=False)
     transform_cholesterol.to_sql('CholesterolTypes', con=engine, if_exists='append', index=False)
     transform_gender.to_sql('Gender', con=engine, if_exists='append', index=False)
@@ -72,4 +80,5 @@ def DimensionalModel(dfCardio, dfDeaths):
     transform_year.to_sql('Year', con=engine, if_exists='append', index=False)
 
     fileDeaths.df.to_sql('CauseOfDeaths', con=engine, if_exists='append', index=False)
+
 
