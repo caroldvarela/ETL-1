@@ -66,18 +66,6 @@ This project is developed within a virtual machine running **Ubuntu**. The dashb
 2. Install PostgreSQL : [PostgreSQL Downloads](https://www.postgresql.org/download/)
 3. Install Power BI : [Install Power BI Desktop](https://www.microsoft.com/en-us/download/details.aspx?id=58494) 
 
-## Environment Variables
-
-To run this project, you will need to add the following environment variables to your .env file
-(add the file to the root of the project)
-
-`PGDIALECT` <- This variable specifies the dialect of PostgreSQL to be used in the connection.  
-`PGUSER` <- Defines the username to be used for authenticating against the PostgreSQL database.  
-`PGPASSWD` <- This variable stores the password associated with the PostgreSQL user for authentication.  
-`PGHOST` <- Indicates the address of the PostgreSQL database server that the application will connect to.  
-`PGPORT` <-  Specifies the port on which the PostgreSQL database server is listening.  
-`PGDB` <- Defines the name of the database that the application will connect to.  
-`WORK_DIR` <- Sets the working directory for the application, indicating the base path for performing operations and managing files.
 
 ## Notebooks
 
@@ -175,6 +163,14 @@ To run this project, you will need to add the following environment variables to
    PGPORT=5432
    PGDB=<your_db_name>
    WORK_DIR=<your_working_directory>
+   
+- `PGDIALECT` <- This variable specifies the dialect of PostgreSQL to be used in the connection.  
+- `PGUSER` <- Defines the username to be used for authenticating against the PostgreSQL database.  
+- `PGPASSWD` <- This variable stores the password associated with the PostgreSQL user for authentication.  
+- `PGHOST` <- Indicates the address of the PostgreSQL database server that the application will connect to.  
+- `PGPORT` <-  Specifies the port on which the PostgreSQL database server is listening.  
+- `PGDB` <- Defines the name of the database that the application will connect to.  
+- `WORK_DIR` <- Sets the working directory for the application, indicating the base path for performing operations and managing files.
 
 ## Airflow
 
