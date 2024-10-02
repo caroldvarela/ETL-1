@@ -140,7 +140,7 @@ To run this project, you will need to add the following environment variables to
    ```sql
    CREATE USER <your_user> WITH PASSWORD '<your_password>';
    ALTER USER <your_user> WITH SUPERUSER;
-   CREATE DATABASE workshop2 OWNER <your_user>;
+   CREATE DATABASE <your_db_name> OWNER <your_user>;
    
 - **Configure PostgreSQL for External Access (Optional for PowerBI)**  
    The PostgreSQL configuration files are generally located in `/etc/postgresql/{version}/main/`
@@ -173,7 +173,7 @@ To run this project, you will need to add the following environment variables to
    PGPASSWD=<your_password>
    PGHOST=localhost
    PGPORT=5432
-   PGDB=workshop2
+   PGDB=<your_db_name>
    WORK_DIR=<your_working_directory>
 
 ## Airflow
