@@ -26,21 +26,12 @@ def DimensionalModel(dfCardio, dfDeaths):
     CreateTableCardio(GlucoseTypes, 'GlucoseTypes', engine)
     CreateTableCardio(CholesterolTypes, 'CholesterolTypes', engine)
     CreateTableCardio(Gender, 'Gender', engine)
-    CreateTableCardio(CardioTrainNormalize, 'CardioTrainNormalize', engine)
+    CreateTableCardio(CardioTrainNormalizeDimensional, 'CardioTrainNormalizeDimensional', engine)
 
     # Transformations
 
     fileCardio = DataTransform(dfCardio)
-    fileCardio.gender_by_category()
-    fileCardio.cholesterol_by_category()
-    fileCardio.gluc_by_category()
-    fileCardio.bmi()
-    fileCardio.days_to_age()
-    fileCardio.StandardizeBloodPressure()
-    fileCardio.CategorizeBMI()
-    fileCardio.categorize_blood_pressure()
-    fileCardio.CalculatePulsePressure()
-
+    
     # Create Dimensions
 
     transform_gluc = fileCardio.nomalize_gluc()
@@ -59,18 +50,16 @@ def DimensionalModel(dfCardio, dfDeaths):
     transform_bmi_class.to_sql('BMIClass', con=engine, if_exists='append', index=False)
     transform_lifestyle.to_sql('LifeStyle', con=engine, if_exists='append', index=False)
 
-    fileCardio.df.to_sql('CardioTrainNormalize', con=engine, if_exists='append', index=False)
+    fileCardio.df.to_sql('CardioTrainNormalizeDimensional', con=engine, if_exists='append', index=False)
 
 
     # Cause of deaths dimensional
 
     CreateTableDeaths(Year, 'Year', engine)
     CreateTableDeaths(Countries, 'Countries', engine)
-    CreateTableDeaths(CauseOfDeaths, 'CauseOfDeaths', engine)
+    CreateTableDeaths(CauseOfDeathsDimensional, 'CauseOfDeathsDimensional', engine)
 
     fileDeaths = DataTransformCauseOfDeaths(dfDeaths)
-    fileDeaths.total_deaths()
-    fileDeaths.insert_id()
 
     transform_countries = fileDeaths.normalize_countries()
     transform_year = fileDeaths.normalize_year()
@@ -79,6 +68,29 @@ def DimensionalModel(dfCardio, dfDeaths):
     transform_countries.to_sql('Countries', con=engine, if_exists='append', index=False)
     transform_year.to_sql('Year', con=engine, if_exists='append', index=False)
 
-    fileDeaths.df.to_sql('CauseOfDeaths', con=engine, if_exists='append', index=False)
+    fileDeaths.df.to_sql('CauseOfDeathsDimensional', con=engine, if_exists='append', index=False)
 
 
+
+from src.database.dbconnection import getconnection
+from src.model.models import *
+from sqlalchemy.orm import sessionmaker, declarative_base, aliased
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from matplotlib import rcParams
+
+engine = getconnection()
+Session = sessionmaker(bind=engine)
+session = Session()
+
+table = aliased(CardioTrainNormalize)
+query = session.query(table).statement
+dfCardio = pd.read_sql(query, engine, index_col=None)
+
+table = aliased(CauseOfDeaths)
+query = session.query(table).statement
+dfDeaths = pd.read_sql(query, engine, index_col=None)
+
+DimensionalModel(dfCardio, dfDeaths)

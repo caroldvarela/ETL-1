@@ -211,7 +211,7 @@ class DataTransform:
 class DataTransformCauseOfDeaths:
     def __init__(self, file_or_df):
         if isinstance(file_or_df, str): 
-            self.df = pd.read_csv(file_or_df, sep=";")
+            self.df = pd.read_csv(file_or_df)
         elif isinstance(file_or_df, pd.DataFrame):  
             self.df = file_or_df
         else:
@@ -225,7 +225,8 @@ class DataTransformCauseOfDeaths:
 
         first_columns = self.df.columns[:3]
 
-        self.df = self.df[first_columns.tolist() + ['TotalDeaths'] + ['Cardiovascular']]
+
+        self.df = self.df[first_columns.tolist()+ ['TotalDeaths']+ ['Cardiovascular']]
 
     
     def normalize_countries(self) -> pd.DataFrame:
