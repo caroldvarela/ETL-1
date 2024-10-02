@@ -5,7 +5,7 @@ work_dir = os.getenv("WORK_DIR")
 sys.path.append(work_dir)
 
 import pandas as pd
-from TransformData import *
+from transform.TransformData import *
 from src.database.createTable import *
 from src.model.models import *
 from src.database.dbconnection import getconnection
