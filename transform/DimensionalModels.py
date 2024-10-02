@@ -70,27 +70,3 @@ def DimensionalModel(dfCardio, dfDeaths):
 
     fileDeaths.df.to_sql('CauseOfDeathsDimensional', con=engine, if_exists='append', index=False)
 
-
-
-from src.database.dbconnection import getconnection
-from src.model.models import *
-from sqlalchemy.orm import sessionmaker, declarative_base, aliased
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from matplotlib import rcParams
-
-engine = getconnection()
-Session = sessionmaker(bind=engine)
-session = Session()
-
-table = aliased(CardioTrainNormalize)
-query = session.query(table).statement
-dfCardio = pd.read_sql(query, engine, index_col=None)
-
-table = aliased(CauseOfDeaths)
-query = session.query(table).statement
-dfDeaths = pd.read_sql(query, engine, index_col=None)
-
-DimensionalModel(dfCardio, dfDeaths)
