@@ -112,8 +112,8 @@ class CardioTrainNormalizeDimensional(BASE):
     height = Column(Integer, nullable=False)
     weight = Column(Float, nullable=False)
     bmi = Column(Float, nullable=False)
-    ap_hi = Column(Integer, nullable=False)  # Presión arterial sistólica
-    ap_lo = Column(Integer, nullable=False)  # Presión arterial diastólica
+    ap_hi = Column(Integer, nullable=False)  # Systolic blood pressure.
+    ap_lo = Column(Integer, nullable=False)  # Diastolic blood pressure.
     cholesterolID = Column(Integer, ForeignKey('CholesterolTypes.id'), nullable=False)
     glucID = Column(Integer, ForeignKey('GlucoseTypes.id'), nullable=False)
     lifestyleID = Column(Integer, ForeignKey('LifeStyle.id'), nullable=False)
