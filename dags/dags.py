@@ -5,9 +5,9 @@ import sys
 load_dotenv()
 work_dir = os.getenv('WORK_DIR')
 sys.path.append(work_dir)
-print(os.getenv('PYTHONASYNCIODEBUG'))
 
-sys.path.append('/home/manuel/Escritorio/proyecto_ETL/ETL-1')
+
+
 
 
 from datetime import timedelta
@@ -19,7 +19,7 @@ from dags.etl import *
 
 
 
-# Definir los argumentos por defecto para las tareas
+# Define default arguments for tasks
 default_args = {
     'owner': 'Airflow_proyecto',
     'depends_on_past': False,
@@ -31,7 +31,7 @@ default_args = {
     'retry_delay': timedelta(minutes=1)
 }
 
-# Definir el DAG
+# Define the DAG
 with DAG(
     'Airflow_proyecto',
     default_args=default_args,
@@ -39,7 +39,7 @@ with DAG(
     schedule_interval='@daily',  # Set the schedule interval as per your requirements
 ) as dag:
     
-    # Task 1: Extraer los datos de la base de datos
+    # Task 1: Extract data from the database.
     extract_cardio = PythonOperator(
         task_id='extract_cardio',
         python_callable=extract_data_cardio,
@@ -60,6 +60,6 @@ with DAG(
         python_callable=load_data,
     )
 
-    # Definir la secuencia de las tareas
+    # Define the sequence of tasks.
     extract_cardio >> transform_cardio >> Dimensional
     extract_deaths >> Dimensional
