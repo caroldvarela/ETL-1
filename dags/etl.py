@@ -1,95 +1,115 @@
 import pandas as pd
+import sys
+import os
+from dotenv import load_dotenv
+from decouple import config
+
+load_dotenv()
+work_dir = os.getenv('WORK_DIR')
+
+
+import pandas as pd
 import os
 import sys
 from decouple import config
 from sqlalchemy.orm import sessionmaker
 from src.database.dbconnection import getconnection
+from src.model.models import *
+
 from transform.DimensionalModels import DimensionalModel
 from transform.TransformData import DataTransform
 from transform.TransformData import DataTransformCauseOfDeaths
 import logging as log
+from sqlalchemy.orm import sessionmaker, aliased
+import json
+from transform.TransformData import DataTransform, DataTransformCauseOfDeaths
 
-sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/../'))
 
-
-def extract_data(**kwargs):
-    log.info("Extracting data from the database")
-    
-    # Obtener la conexión
+def extract_data_cardio(**kwargs):
     engine = getconnection()
-    
-    # Leer datos de las tablas en DataFrames
-    try:
-        df_cardio = pd.read_sql('SELECT * FROM "CardioTrain"', con=engine)
-        df_deaths = pd.read_sql('SELECT * FROM "CauseOfDeaths"', con=engine)
-        log.info("Data extracted successfully")
-    except Exception as e:
-        log.error(f"Error extracting data: {e}")
-        raise
-    
-    # Empujar datos usando XCom
-    kwargs['ti'].xcom_push(key='cardio_data', value=df_cardio.to_json(orient='records'))
-    kwargs['ti'].xcom_push(key='deaths_data', value=df_deaths.to_json(orient='records'))
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    log.info("Starting data extraction")
+    table = aliased(CardioTrain)
+    query = str(session.query(table).statement)
+    df = pd.read_sql(query, con=engine)
+    log.info(f"Finish the data extraction {df}")
+    kwargs['ti'].xcom_push(key='cardio', value=df.to_json(orient='records'))
+
+    return df.to_json(orient='records')
 
 def transform_cardio_data(**kwargs):
+    log.info("Starting Data transform")
     ti = kwargs['ti']
-    str_data = ti.xcom_pull(task_ids='extract_data', key='cardio_data')
-    
-    if str_data:
-        df_cardio = pd.read_json(str_data, orient='records')
-        log.info("Transforming cardiovascular data")
-        
-        # Llamar a las funciones de transformación de cardio
-        try:
-            transformed_data = DataTransform(df_cardio)
-            transformed_data.gender_by_category()
-            transformed_data.bmi()
-            transformed_data.CategorizeBMI()
-            log.info("Cardiovascular data transformed successfully")
-        except Exception as e:
-            log.error(f"Error transforming cardiovascular data: {e}")
-            raise
-        
-        df_transformed = transformed_data.df
-        kwargs['ti'].xcom_push(key='transformed_cardio_data', value=df_transformed.to_json(orient='records'))
-    else:
-        log.error("No cardiovascular data found in XCom")
+    str_data = ti.xcom_pull(task_ids="extract_data_cardio", key='cardio')
+    if str_data is None:
+        log.error("No data found in XCom for 'grammy_data'")
+        return
 
-def transform_deaths_data(**kwargs):
-    ti = kwargs['ti']
-    str_data = ti.xcom_pull(task_ids='extract_data', key='deaths_data')
+    json_df = json.loads(str_data)
+    df = pd.json_normalize(data=json_df)
+    log.info(f"Data is {df}")
+    file = DataTransform(df)
+    file.gender_by_category()
+    file.cholesterol_by_category()
+    file.gluc_by_category()
+    file.bmi()
+    file.days_to_age()
+    file.StandardizeBloodPressure()
+    file.CategorizeBMI()
+    file.categorize_blood_pressure()
+    file.CalculatePulsePressure()
 
-    if str_data:
-        df_deaths = pd.read_json(str_data, orient='records')
-        log.info("Transforming cause of death data")
-        
-        # Llamar a las funciones de transformación de muertes
-        try:
-            transformed_deaths = DataTransformCauseOfDeaths(df_deaths)
-            transformed_deaths.total_deaths()
-            log.info("Cause of death data transformed successfully")
-        except Exception as e:
-            log.error(f"Error transforming cause of death data: {e}")
-            raise
-        
-        df_transformed = transformed_deaths.df
-        kwargs['ti'].xcom_push(key='transformed_deaths_data', value=df_transformed.to_json(orient='records'))
-    else:
-        log.error("No cause of death data found in XCom")
+    df = file.df.copy()
+
+ 
+    kwargs['ti'].xcom_push(key='transform_cardio_data', value=json.dumps(df))
+    log.info('columns: ', df.columns)
+    return json.dumps(df)
+
+
+
+def extract_data_deaths(**kwargs):
+    engine = getconnection()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    log.info("Starting data extraction")
+    table = aliased(CauseOfDeaths)
+    query = str(session.query(table).statement)
+    df = pd.read_sql(query, con=engine)
+    log.info(f"Finish the data extraction {df}")
+    kwargs['ti'].xcom_push(key='deaths', value=df.to_json(orient='records'))
+
+    return df.to_json(orient='records')
+
+
+
 
 def load_data(**kwargs):
-    ti = kwargs['ti']
-    cardio_data = ti.xcom_pull(task_ids='transform_cardio_data', key='transformed_cardio_data')
-    deaths_data = ti.xcom_pull(task_ids='transform_deaths_data', key='transformed_deaths_data')
+    log.info("Starting data merge")
 
-    if cardio_data and deaths_data:
-        log.info("Loading data into the database")
-        try:
-            engine = getconnection()
-            DimensionalModel(pd.read_json(cardio_data), pd.read_json(deaths_data))
-            log.info("Data loaded into the database successfully")
-        except Exception as e:
-            log.error(f"Error loading data into the database: {e}")
-            raise
-    else:
-        log.error("No transformed data found for loading")
+    ti = kwargs["ti"]
+    
+    # Pull data from XCom
+    json_1 = ti.xcom_pull(task_ids="transform_cardio", key='transformed_grammy_data')
+    json_2 = ti.xcom_pull(task_ids="extract_deaths", key='deaths')
+
+    log.info(json_1)
+    # Check if the data exists
+    if json_1 is None:
+        log.error("No data found in XCom for 'transform_grammy'")
+        return
+
+    if json_2 is None:
+        log.error("No data found in XCom for 'transform_csv'")
+        return
+    
+    data1 = json.loads(json_1)
+    data2 = json.loads(json_2)
+
+    df1 = pd.DataFrame(data1["data"])
+    df2 = pd.DataFrame(data2["data"])
+
+    DimensionalModel(df1,df2)
+
+    return df1.to_json(orient='records')

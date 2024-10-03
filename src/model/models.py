@@ -195,4 +195,3 @@ class BloodPreasureCategories(BASE):
 
     def __str__ (self):
         return f" Table: {self.BloodPreasureCategories.__table__}"
-
