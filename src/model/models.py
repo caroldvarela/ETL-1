@@ -12,8 +12,8 @@ class CardioTrain(BASE):
     gender = Column(Integer, nullable=False)
     height = Column(Integer, nullable=False)
     weight = Column(Float, nullable=False)
-    ap_hi = Column(Integer, nullable=False)  # Presión arterial sistólica
-    ap_lo = Column(Integer, nullable=False)  # Presión arterial diastólica
+    ap_hi = Column(Integer, nullable=False)  # Systolic blood pressure.
+    ap_lo = Column(Integer, nullable=False)  # Diastolic blood pressure.
     cholesterol = Column(Integer, nullable=False)
     gluc = Column(Integer, nullable=False)
     smoke = Column(Integer, nullable=False)
@@ -86,8 +86,8 @@ class CardioTrainNormalize(BASE):
     height = Column(Integer, nullable=False)
     weight = Column(Float, nullable=False)
     bmi = Column(Float, nullable=False)
-    ap_hi = Column(Integer, nullable=False)  # Presión arterial sistólica
-    ap_lo = Column(Integer, nullable=False)  # Presión arterial diastólica
+    ap_hi = Column(Integer, nullable=False)  # Systolic blood pressure.
+    ap_lo = Column(Integer, nullable=False)  # Diastolic blood pressure.
     cholesterol = Column(String, nullable=False)
     gluc = Column(String, nullable=False)
     smoke = Column(Integer, nullable=False)
