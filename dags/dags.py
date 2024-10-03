@@ -44,17 +44,17 @@ with DAG(
         task_id='extract_cardio',
         python_callable=extract_data_cardio,
     )
-
+    # Task 2: Transform cardiovascular data
     transform_cardio = PythonOperator(
         task_id='transform_cardio',
         python_callable=transform_cardio_data,
     )
-
+    # Task 3: Extract death data
     extract_deaths = PythonOperator(
         task_id='extract_deaths',
         python_callable=extract_data_deaths,
     )
-
+    # Task 4: Load dimensional data
     Dimensional = PythonOperator(
         task_id='Dimensional',
         python_callable=load_data,
