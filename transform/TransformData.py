@@ -9,7 +9,7 @@ class DataTransform:
         elif isinstance(file_or_df, pd.DataFrame):  
             self.df = file_or_df
         else:
-            raise ValueError("El argumento debe ser una URL/ruta de archivo o un DataFrame")
+            raise ValueError("The argument must be a URL/file path or a DataFrame.")
     
     
     def  gender_by_category(self) -> None:
