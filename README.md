@@ -12,6 +12,8 @@ Exploratory Data Analysis (EDA) is a crucial step in any data science project, a
 In this project, we will work with two main datasets:
 
 1. **💓 Cardio Train Dataset**: This dataset contains information on various health indicators of individuals, such as age, gender, height, weight, blood pressure, cholesterol levels, and more. The goal is to explore these data points to identify potential correlations and patterns that could be useful in predicting cardiovascular diseases.
+   
+2. **⚠️ Cause Of Deaths**: This dataset provides information on causes of death at a global level, broken down by country and year. It records a wide range of diseases and conditions, such as meningitis, respiratory diseases, and various forms of cancer, among others. However, the main focus is on mortality associated with cardiovascular diseases.
 
 #### Data Description
 
