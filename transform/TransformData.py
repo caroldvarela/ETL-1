@@ -206,6 +206,25 @@ class DataTransform:
 
         return lifestyle_df
 
+class DataTransformOwid:
+    def __init__(self, file_or_df):
+        if isinstance(file_or_df, str): 
+            self.df = pd.read_csv(file_or_df)
+        elif isinstance(file_or_df, pd.DataFrame):  
+            self.df = file_or_df
+        else:
+            raise ValueError("error")
+        
+    def data_imputation(self):
+        for col in self.df.columns:
+            if col not in ['id', 'Country', 'Code', 'Year']:  
+                self.df[col] = self.df.groupby('Year')[col].transform(lambda x: x.fillna(x.median()) if x.notna().sum() > 0 else x) #besity_prevalence_percentage & diabetes_prevalence_percentage just have information until 2016
+    
+    def feautres_imputation(self):
+        self.df['gdp'] = self.df['gdp_per_capita']*self.df['population']
+        self.df.insert(11, 'gdp', self.df.pop('gdp'))
+        self.df['DeathRate'] = (self.df['CardiovascularDeaths'] / self.df['population']) * 100000
+
 
 
 class DataTransformCauseOfDeaths:
@@ -215,7 +234,7 @@ class DataTransformCauseOfDeaths:
         elif isinstance(file_or_df, pd.DataFrame):  
             self.df = file_or_df
         else:
-            raise ValueError("El argumento debe ser una URL/ruta de archivo o un DataFrame")
+            raise ValueError("error")
     
     def insert_id(self) -> None:
         self.df['id'] = range(1,len(self.df)+1)
@@ -270,7 +289,3 @@ class DataTransformCauseOfDeaths:
         self.df.drop(columns=['Year'], inplace=True)
 
         return year_df
-
-    def assign_ids(self) -> None:
-        # Ensure to use .loc to avoid SettingWithCopyWarning
-        self.df.loc[:, 'id'] = range(1, len(self.df) + 1)

@@ -54,12 +54,33 @@ with DAG(
         task_id='extract_deaths',
         python_callable=extract_data_deaths,
     )
+    extract_api = PythonOperator(
+        task_id='extract_api',
+        python_callable=extract_owid_data,
+    )
+    transform_api = PythonOperator(
+        task_id='transform_api',
+        python_callable=transform_owid,
+    )
+    Merge = PythonOperator(
+        task_id='Merge',
+        python_callable=merge,
+    )
+
     # Task 4: Load dimensional data
-    Dimensional = PythonOperator(
-        task_id='Dimensional',
+    load = PythonOperator(
+        task_id='load',
         python_callable=load_data,
     )
 
+    producer = PythonOperator(
+        task_id='producer',
+        python_callable=producer_kafka,
+    )
+
+    
+
     # Define the sequence of tasks.
-    extract_cardio >> transform_cardio >> Dimensional
-    extract_deaths >> Dimensional
+    extract_cardio >> transform_cardio >> load
+    extract_deaths >> Merge >> load 
+    extract_api >> transform_api >> Merge >> load

@@ -70,3 +70,5 @@ def DimensionalModel(dfCardio, dfDeaths):
 
     fileDeaths.df.to_sql('CauseOfDeathsDimensional', con=engine, if_exists='append', index=False)
 
+    return fileCardio.df, fileDeaths.df
+
