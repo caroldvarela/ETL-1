@@ -23,11 +23,11 @@ from dags.etl import *
 default_args = {
     'owner': 'Airflow_proyecto',
     'depends_on_past': False,
-    'start_date': datetime(2023, 10, 1),  # Update the start date to today or an appropriate date
+    'start_date': datetime(2024, 10, 21),  # Update the start date to today or an appropriate date
     'email': ['airflow@example.com'],
     'email_on_failure': False,
     'email_on_retry': False,
-    'retries': 1,
+    'retries': 0,
     'retry_delay': timedelta(minutes=1)
 }
 
@@ -83,4 +83,4 @@ with DAG(
     # Define the sequence of tasks.
     extract_cardio >> transform_cardio >> load
     extract_deaths >> Merge >> load 
-    extract_api >> transform_api >> Merge >> load
+    extract_api >> transform_api >> Merge >> load >> producer

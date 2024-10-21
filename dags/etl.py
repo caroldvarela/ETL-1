@@ -3,7 +3,7 @@ import sys
 import os
 from dotenv import load_dotenv
 from decouple import config
-from owid.catalog import charts
+from transform.charts import get_data
 
 
 load_dotenv()
@@ -76,19 +76,19 @@ def transform_cardio_data(**kwargs):
 
 
 def extract_owid_data(**kwargs):
-    air_pollution = charts.get_data('https://ourworldindata.org/grapher/long-run-air-pollution')
+    air_pollution = get_data('https://ourworldindata.org/grapher/long-run-air-pollution')
     air_pollution.rename(columns={'entities': 'Country', 'years': 'Year', 'nox': 'nitrogen_oxide(NOx)' , 'so2': 'sulphur_dioxide(SO2)', 'co': 'carbon_monoxide(CO)', 'bc': 'black_carbon(BC)', 'nh3': 'ammonia(NH3)', 'nmvoc': 'non_methane_volatile_organic_compounds'}, inplace=True)
 
-    gdp_per_capita = charts.get_data('https://ourworldindata.org/grapher/gdp-per-capita-penn-world-table')
+    gdp_per_capita = get_data('https://ourworldindata.org/grapher/gdp-per-capita-penn-world-table')
     gdp_per_capita.rename(columns={'entities': 'Country', 'years': 'Year','gdp_per_capita_penn_world_table': 'gdp_per_capita'}, inplace=True)
 
-    obesity = charts.get_data('https://ourworldindata.org/grapher/obesity-prevalence-adults-who-gho')
+    obesity = get_data('https://ourworldindata.org/grapher/obesity-prevalence-adults-who-gho')
     obesity.rename(columns={'entities': 'Country', 'years': 'Year', 'obesity_prevalence_adults_who_gho': 'obesity_prevalence_percentage'}, inplace=True)
 
-    diabetes = charts.get_data('https://ourworldindata.org/grapher/diabetes-prevalence-who-gho')
+    diabetes = get_data('https://ourworldindata.org/grapher/diabetes-prevalence-who-gho')
     diabetes.rename(columns={'entities': 'Country', 'years': 'Year', 'diabetes_prevalence_who_gho': 'diabetes_prevalence_percentage'}, inplace=True)
 
-    population = charts.get_data('https://ourworldindata.org/grapher/population')
+    population = get_data('https://ourworldindata.org/grapher/population')
     population.rename(columns={'entities': 'Country', 'years': 'Year'}, inplace=True)
 
     merged_air = pd.merge(air_pollution, gdp_per_capita, left_on=['Country', 'Year'],
@@ -109,14 +109,14 @@ def extract_owid_data(**kwargs):
 def transform_owid(**kwargs):
     log.info("Starting Data transform")
     ti = kwargs['ti']
-    str_data = ti.xcom_pull(task_ids="extract_owid", key='owid')
+    str_data = ti.xcom_pull(task_ids="extract_api", key='owid')
     if str_data is None:
         log.error("No data found in XCom for 'cardio'")
         return
     json_df = json.loads(str_data)
     df = pd.json_normalize(data=json_df)
     file = DataTransformOwid(df)
-    file.data_imputation()
+
     file.feautres_imputation()
   
     rename_columns = {
@@ -129,7 +129,6 @@ def transform_owid(**kwargs):
 
     df = file.df
     df = df.rename(columns=rename_columns)
-    log.info(df)
 
     result = {
         "source":"owid_transform",
@@ -165,17 +164,17 @@ def merge(**kwargs):
     log.info("Starting data merge")
     # Pull data from XCom
     ti = kwargs["ti"]
-    json_1 = ti.xcom_pull(task_ids="transform_api", key='owidtransform')
-    json_2 = ti.xcom_pull(task_ids="extract_deaths", key='deaths')
+    json_2 = ti.xcom_pull(task_ids="transform_api", key='owidtransform')
+    json_1 = ti.xcom_pull(task_ids="extract_deaths", key='deaths')
     if json_1 is None:
         log.error("No data found in XCom for 'transform_cardio'")
         return
     
-    log.info("json2", json_2)
+
     if json_2 is None:
         log.error("No data found in XCom for 'transform_deaths'")
         return
-    log.info("json1", json_1)
+
     
     data1 = json.loads(json_1)
     data2 = json.loads(json_2)
@@ -187,6 +186,19 @@ def merge(**kwargs):
     merged_df = pd.merge(df1, df2, left_on=['Country', 'Year'],
                     right_on=['Country', 'Year'], how='left')
     
+    log.info("Message")
+    log.info(merged_df.isnull().sum())
+    log.info(merged_df.columns)
+
+    for col in merged_df.columns:
+        if col not in ['id', 'Country', 'Code', 'Year']:  
+            merged_df[col] = merged_df.groupby('Year')[col].transform(lambda x: x.fillna(x.median()) if x.notna().sum() > 0 else x) #besity_prevalence_percentage & diabetes_prevalence_percentage just have information until 2016
+
+    log.info("Message2")
+    log.info(merged_df.isnull().sum()) 
+    
+    merged_df['DeathRate'] = (merged_df['Cardiovascular'] / merged_df['population']) * 100000
+
     result = {
         "source":"merge_data",
         "data": merged_df.to_dict(orient='records')
@@ -203,8 +215,8 @@ def load_data(**kwargs):
     ti = kwargs["ti"]
     
     # Pull data from XCom
-    json_1 = ti.xcom_pull(task_ids="Merge", key='data_merged')
-    json_2 = ti.xcom_pull(task_ids="transform_cardio", key='transform_cardio_data')
+    json_2 = ti.xcom_pull(task_ids="Merge", key='data_merged')
+    json_1 = ti.xcom_pull(task_ids="transform_cardio", key='transform_cardio_data')
 
     log.info(json_1)
     # Check if the data exists

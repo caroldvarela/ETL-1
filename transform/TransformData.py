@@ -223,7 +223,6 @@ class DataTransformOwid:
     def feautres_imputation(self):
         self.df['gdp'] = self.df['gdp_per_capita']*self.df['population']
         self.df.insert(11, 'gdp', self.df.pop('gdp'))
-        self.df['DeathRate'] = (self.df['CardiovascularDeaths'] / self.df['population']) * 100000
 
 
 
