@@ -148,8 +148,6 @@ opentelemetry-sdk==1.27.0
 opentelemetry-semantic-conventions==0.48b0
 ordered-set==4.1.0
 overrides==7.7.0
-owid-catalog==0.3.11
-owid-repack==0.1.3
 packaging==24.1
 pandas==2.1.4
 pandocfilters==1.5.1
@@ -240,3 +238,6 @@ WTForms==3.1.2
 xarray==2024.9.0
 yarl==1.13.1
 zipp==3.20.2
+
+owid-catalog==0.3.11
+owid-repack==0.1.3
