@@ -2,7 +2,7 @@ from kafka import KafkaProducer, KafkaConsumer
 from json import dumps, loads
 import time
 import pandas as pd
-
+from src.streaming.data_to_powerbi import send_to_powerbi
 
 def kafka_producer(data):
     producer = KafkaProducer(
@@ -31,5 +31,7 @@ def kafka_consumer():
     try:
         for m in consumer:
             print(f"Message received: {m.value}\n")
+            row_data = m.value
+            send_to_powerbi(row_data)
     except Exception as e:
         print(f"Error: {e}")
