@@ -39,17 +39,18 @@ with DAG(
     schedule_interval='@daily',  # Set the schedule interval as per your requirements
 ) as dag:
     
-    # Task 1: Extract data from the database.
     extract_cardio = PythonOperator(
         task_id='extract_cardio',
         python_callable=extract_data_cardio,
     )
-    # Task 2: Transform cardiovascular data
+
+    
+
     transform_cardio = PythonOperator(
         task_id='transform_cardio',
         python_callable=transform_cardio_data,
     )
-    # Task 3: Extract death data
+
     extract_deaths = PythonOperator(
         task_id='extract_deaths',
         python_callable=extract_data_deaths,
@@ -67,7 +68,6 @@ with DAG(
         python_callable=merge,
     )
 
-    # Task 4: Load dimensional data
     load = PythonOperator(
         task_id='load',
         python_callable=load_data,
@@ -80,7 +80,6 @@ with DAG(
 
     
 
-    # Define the sequence of tasks.
     extract_cardio >> transform_cardio >> load
     extract_deaths >> Merge >> load 
     extract_api >> transform_api >> Merge >> load >> producer

@@ -55,7 +55,6 @@ class CauseOfDeathsDimensional(BASE):
     obesity_prevalence_percentage = Column(Float, nullable=True)
     diabetes_prevalence_percentage = Column(Float, nullable=True)
     population = Column(Float, nullable=False)
-    TotalDeaths = Column(Float, nullable=False)
     DeathRate = Column(Float, nullable=False)
     TotalDeaths = Column(Integer, nullable=False)
 

@@ -26,6 +26,7 @@ from sqlalchemy.orm import sessionmaker, aliased
 import json
 from transform.TransformData import DataTransform, DataTransformCauseOfDeaths
 
+from src.streaming.kafka_utils import kafka_producer
 
 def extract_data_cardio(**kwargs):
     engine = getconnection()
@@ -236,7 +237,12 @@ def load_data(**kwargs):
     df1 = pd.DataFrame(data1["data"])
     df2 = pd.DataFrame(data2["data"])
 
+    df2['obesity_prevalence_percentage'] = df2['obesity_prevalence_percentage'].fillna(df2['obesity_prevalence_percentage'].mean())
+    df2['diabetes_prevalence_percentage'] = df2['diabetes_prevalence_percentage'].fillna(df2['diabetes_prevalence_percentage'].mean())
+
     df1_normalize, df2_normalize = DimensionalModel(df1,df2)
+
+
     result = {
         "data_cardio": df1_normalize.to_dict(orient='records'),
         "data_deaths": df2_normalize.to_dict(orient='records')
@@ -249,5 +255,11 @@ def load_data(**kwargs):
 
 def producer_kafka(**kwargs):
     log.info("kafka producer")
+    ti = kwargs["ti"]
 
-    return "hola"
+    json1 = ti.xcom_pull(task_ids="load", key='data_load')
+    data = json.loads(json1)
+    df1 = pd.DataFrame(data["data_deaths"])
+    
+    kafka_producer(df1)
+    log.info("All messages send")

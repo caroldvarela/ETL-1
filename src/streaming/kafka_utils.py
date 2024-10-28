@@ -1,3 +1,13 @@
+import sys
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+work_dir = os.getenv('WORK_DIR')
+
+
+sys.path.append(work_dir)
+
 from kafka import KafkaProducer, KafkaConsumer
 from json import dumps, loads
 import time
@@ -22,7 +32,7 @@ def kafka_consumer():
     consumer = KafkaConsumer(
         'kafka_project',
         #auto_offset_reset='lastest',
-        enable_auto_commit=True,
+        enable_auto_commit=False,
         group_id='my-group-1',
         value_deserializer=lambda m: loads(m.decode('utf-8')),
         bootstrap_servers=['localhost:9092']
@@ -35,3 +45,7 @@ def kafka_consumer():
             send_to_powerbi(row_data)
     except Exception as e:
         print(f"Error: {e}")
+
+
+if __name__ == "__main__":
+    kafka_consumer()
