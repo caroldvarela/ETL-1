@@ -41,10 +41,23 @@ def extract_data_cardio(**kwargs):
 
     return df.to_json(orient='records')
 
+def validate_cardio(**kwargs):
+    log.info("Starting Data validate")
+    ti = kwargs['ti']
+    str_data = ti.xcom_pull(task_ids="extract_cardio", key='cardio')
+    json_df = json.loads(str_data)
+    df = pd.json_normalize(data=json_df)
+
+    
+    kwargs['ti'].xcom_push(key='cardio_validate', value=df.to_json(orient='records'))
+
+    return df.to_json(orient='records')
+
+
 def transform_cardio_data(**kwargs):
     log.info("Starting Data transform")
     ti = kwargs['ti']
-    str_data = ti.xcom_pull(task_ids="extract_cardio", key='cardio')
+    str_data = ti.xcom_pull(task_ids="validate_cardio_data", key='cardio_validate')
     if str_data is None:
         log.error("No data found in XCom for 'cardio'")
         return
@@ -107,10 +120,27 @@ def extract_owid_data(**kwargs):
 
     return merged_df.to_json(orient='records')
 
+def validate_api(**kwargs):
+
+    log.info("Starting Data validate")
+    ti = kwargs['ti']
+    str_data = ti.xcom_pull(task_ids="extract_api", key='owid')
+    if str_data is None:
+        log.error("No data found in XCom for 'cardio'")
+        return
+    json_df = json.loads(str_data)
+    df = pd.json_normalize(data=json_df)
+
+    kwargs['ti'].xcom_push(key='owid_validate', value=df.to_json(orient='records'))
+
+    return df.to_json(orient='records')
+
+
+
 def transform_owid(**kwargs):
     log.info("Starting Data transform")
     ti = kwargs['ti']
-    str_data = ti.xcom_pull(task_ids="extract_api", key='owid')
+    str_data = ti.xcom_pull(task_ids="validate_api_data", key='owid_validate')
     if str_data is None:
         log.error("No data found in XCom for 'cardio'")
         return
@@ -161,12 +191,33 @@ def extract_data_deaths(**kwargs):
 
     return json.dumps(result)
 
+
+def validate_deaths(**kwargs):
+    log.info("Starting Data Validate")
+    ti = kwargs['ti']
+
+    json_1 = ti.xcom_pull(task_ids="extract_deaths", key='deaths')
+    if json_1 is None:
+        log.error("No data found in XCom for 'cardio'")
+        return
+    data1 = json.loads(json_1)
+    df = pd.DataFrame(data1["data"])
+    result = {
+            "source":"deaths",
+            "data": df.to_dict(orient='records')
+    }
+    kwargs['ti'].xcom_push(key='deaths_validated', value=json.dumps(result))
+
+    return json.dumps(result)
+
+
+
 def merge(**kwargs):
     log.info("Starting data merge")
     # Pull data from XCom
     ti = kwargs["ti"]
     json_2 = ti.xcom_pull(task_ids="transform_api", key='owidtransform')
-    json_1 = ti.xcom_pull(task_ids="extract_deaths", key='deaths')
+    json_1 = ti.xcom_pull(task_ids="validate_deaths_data", key='deaths_validated')
     if json_1 is None:
         log.error("No data found in XCom for 'transform_cardio'")
         return
@@ -184,8 +235,9 @@ def merge(**kwargs):
     df1 = pd.DataFrame(data1["data"])
     df2 = pd.DataFrame(data2["data"])
 
-    merged_df = pd.merge(df1, df2, left_on=['Country', 'Year'],
-                    right_on=['Country', 'Year'], how='left')
+    log.info(df1.columns, df2.columns)
+
+    merged_df = pd.merge(df1, df2, left_on=['Country', 'Year'], right_on=['Country', 'Year'], how='left')
     
     log.info("Message")
     log.info(merged_df.isnull().sum())

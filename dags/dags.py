@@ -36,7 +36,7 @@ with DAG(
     'Airflow_proyecto',
     default_args=default_args,
     description='workflow stadistics',
-    schedule_interval='@daily',  # Set the schedule interval as per your requirements
+    schedule_interval='@daily',  
 ) as dag:
     
     extract_cardio = PythonOperator(
@@ -44,7 +44,10 @@ with DAG(
         python_callable=extract_data_cardio,
     )
 
-    
+    validate_cardio_data  = PythonOperator(
+        task_id='validate_cardio_data',
+        python_callable=validate_cardio,
+    )
 
     transform_cardio = PythonOperator(
         task_id='transform_cardio',
@@ -55,10 +58,21 @@ with DAG(
         task_id='extract_deaths',
         python_callable=extract_data_deaths,
     )
+
+    validate_deaths_data  = PythonOperator(
+        task_id='validate_deaths_data',
+        python_callable=validate_deaths,
+    )
+
     extract_api = PythonOperator(
         task_id='extract_api',
         python_callable=extract_owid_data,
     )
+    validate_api_data  = PythonOperator(
+        task_id='validate_api_data',
+        python_callable=validate_api,
+    )
+
     transform_api = PythonOperator(
         task_id='transform_api',
         python_callable=transform_owid,
@@ -80,6 +94,6 @@ with DAG(
 
     
 
-    extract_cardio >> transform_cardio >> load
-    extract_deaths >> Merge >> load 
-    extract_api >> transform_api >> Merge >> load >> producer
+    extract_cardio >> validate_cardio_data >>transform_cardio >> load
+    extract_deaths >> validate_deaths_data >> Merge >> load 
+    extract_api >> validate_api_data >> transform_api >> Merge >> load >> producer
