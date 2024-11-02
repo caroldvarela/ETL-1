@@ -1,0 +1,9 @@
+# Dockerfile.jupyter
+FROM jupyter/base-notebook:latest
+
+# Cambiar al usuario root para instalar git
+USER root
+RUN apt-get update && apt-get install -y git
+
+# Cambiar de nuevo al usuario jovyan
+USER jovyan

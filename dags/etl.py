@@ -18,6 +18,8 @@ from sqlalchemy.orm import sessionmaker
 from src.database.dbconnection import getconnection
 from src.model.models import *
 
+from src.database.createTable import CreateTableCardio, CreateTableDeaths
+
 from transform.DimensionalModels import DimensionalModel
 from transform.TransformData import *
 
@@ -27,6 +29,8 @@ import json
 from transform.TransformData import DataTransform, DataTransformCauseOfDeaths
 
 from src.streaming.kafka_utils import kafka_producer
+
+
 
 def extract_data_cardio(**kwargs):
     engine = getconnection()

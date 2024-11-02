@@ -15,7 +15,9 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.models.baseoperator import chain
 from datetime import datetime
-from dags.etl import *
+from etl import *
+
+
 
 
 
