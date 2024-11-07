@@ -1,6 +1,6 @@
-import pandas as pd
-import sys
 import os
+import sys
+import pandas as pd
 from dotenv import load_dotenv
 from decouple import config
 from transform.charts import get_data
@@ -10,10 +10,7 @@ load_dotenv()
 work_dir = os.getenv('WORK_DIR')
 
 
-import pandas as pd
-import os
-import sys
-from decouple import config
+
 from sqlalchemy.orm import sessionmaker
 from src.database.dbconnection import getconnection
 from src.model.models import *

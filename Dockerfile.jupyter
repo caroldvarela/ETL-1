@@ -7,3 +7,9 @@ RUN apt-get update && apt-get install -y git
 
 # Cambiar de nuevo al usuario jovyan
 USER jovyan
+
+# Copia el archivo requirements.txt al contenedor
+COPY requirements.txt /home/jovyan/work/requirements.txt
+
+# Instala los paquetes de Python como el usuario airflow
+RUN pip install --no-cache-dir -r /home/jovyan/work/requirements.txt
