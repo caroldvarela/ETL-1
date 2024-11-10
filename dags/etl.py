@@ -4,6 +4,8 @@ import pandas as pd
 from dotenv import load_dotenv
 from decouple import config
 from transform.charts import get_data
+import great_expectations as gx
+import great_expectations.expectations as gxe
 
 
 load_dotenv()
@@ -26,6 +28,7 @@ import json
 from transform.TransformData import DataTransform, DataTransformCauseOfDeaths
 
 from src.streaming.kafka_utils import kafka_producer
+from src.gx_utils.validation import validate_cardio_data, validate_deaths_data, validate_api_data
 
 
 
@@ -43,15 +46,13 @@ def extract_data_cardio(**kwargs):
     return df.to_json(orient='records')
 
 def validate_cardio(**kwargs):
-    log.info("Starting Data validate")
     ti = kwargs['ti']
     str_data = ti.xcom_pull(task_ids="extract_cardio", key='cardio')
     json_df = json.loads(str_data)
     df = pd.json_normalize(data=json_df)
-
     
+    validate_cardio_data(df)  
     kwargs['ti'].xcom_push(key='cardio_validate', value=df.to_json(orient='records'))
-
     return df.to_json(orient='records')
 
 
@@ -122,19 +123,37 @@ def extract_owid_data(**kwargs):
     return merged_df.to_json(orient='records')
 
 def validate_api(**kwargs):
-
     log.info("Starting Data validate")
     ti = kwargs['ti']
     str_data = ti.xcom_pull(task_ids="extract_api", key='owid')
     if str_data is None:
-        log.error("No data found in XCom for 'cardio'")
+        log.error("No data found in XCom for 'owid'")
         return
     json_df = json.loads(str_data)
     df = pd.json_normalize(data=json_df)
-
+    
+    # Filtrado de datos
+    df = df[(df["Year"] >= 1990) & (df["Year"] <= 2019)]
+    
+    
+    df['gdp_per_capita'].fillna(df['gdp_per_capita'].median(), inplace=True)
+    df['obesity_prevalence_percentage'].fillna(df['obesity_prevalence_percentage'].median(), inplace=True)
+    df['diabetes_prevalence_percentage'].fillna(df['diabetes_prevalence_percentage'].median(), inplace=True)
+    
+   
+    expected_columns = [
+        "Country", "Code", "Year", "CardiovascularDeaths", "nitrogen_oxide(NOx)",
+        "sulphur_dioxide(SO2)", "carbon_monoxide(CO)", "black_carbon(BC)", 
+        "ammonia(NH3)", "non_methane_volatile_organic_compounds", "gdp_per_capita",
+        "obesity_prevalence_percentage", "diabetes_prevalence_percentage", 
+        "population", "TotalDeaths"
+    ]
+    df = df.reindex(columns=expected_columns)
+    
+    # Validación con Great Expectations
     kwargs['ti'].xcom_push(key='owid_validate', value=df.to_json(orient='records'))
+    return validate_api_data(df)
 
-    return df.to_json(orient='records')
 
 
 
@@ -194,22 +213,16 @@ def extract_data_deaths(**kwargs):
 
 
 def validate_deaths(**kwargs):
-    log.info("Starting Data Validate")
     ti = kwargs['ti']
+    json_data = ti.xcom_pull(task_ids="extract_deaths", key='deaths')
+    data = json.loads(json_data)
+    df = pd.DataFrame(data["data"])
+    
+    validate_deaths_data(df)  # Llamada a la validación desde gx_utils
+    kwargs['ti'].xcom_push(key='deaths_validated', value=df.to_json(orient='records'))
+    return df.to_json(orient='records')
 
-    json_1 = ti.xcom_pull(task_ids="extract_deaths", key='deaths')
-    if json_1 is None:
-        log.error("No data found in XCom for 'cardio'")
-        return
-    data1 = json.loads(json_1)
-    df = pd.DataFrame(data1["data"])
-    result = {
-            "source":"deaths",
-            "data": df.to_dict(orient='records')
-    }
-    kwargs['ti'].xcom_push(key='deaths_validated', value=json.dumps(result))
 
-    return json.dumps(result)
 
 
 
@@ -219,48 +232,58 @@ def merge(**kwargs):
     ti = kwargs["ti"]
     json_2 = ti.xcom_pull(task_ids="transform_api", key='owidtransform')
     json_1 = ti.xcom_pull(task_ids="validate_deaths_data", key='deaths_validated')
+    
+    # Verifica si json_1 y json_2 son válidos
     if json_1 is None:
         log.error("No data found in XCom for 'transform_cardio'")
         return
     
-
     if json_2 is None:
         log.error("No data found in XCom for 'transform_deaths'")
         return
 
-    
+    # Cargar los datos como JSON
     data1 = json.loads(json_1)
     data2 = json.loads(json_2)
 
+    # Asegurarse de que data1 y data2 tengan la clave 'data'
+    if not isinstance(data1, dict) or "data" not in data1:
+        log.error(f"Unexpected structure for data1: {data1}")
+        return
 
+    if not isinstance(data2, dict) or "data" not in data2:
+        log.error(f"Unexpected structure for data2: {data2}")
+        return
+    
+    # Convertir a DataFrame
     df1 = pd.DataFrame(data1["data"])
     df2 = pd.DataFrame(data2["data"])
 
-    log.info(df1.columns, df2.columns)
-
+    log.info(df1.columns)
+    log.info(df2.columns)
+    
+    # Realiza el merge y manipulación como antes
     merged_df = pd.merge(df1, df2, left_on=['Country', 'Year'], right_on=['Country', 'Year'], how='left')
     
-    log.info("Message")
+    log.info("Data merged successfully")
     log.info(merged_df.isnull().sum())
     log.info(merged_df.columns)
-
+    
     for col in merged_df.columns:
         if col not in ['id', 'Country', 'Code', 'Year']:  
-            merged_df[col] = merged_df.groupby('Year')[col].transform(lambda x: x.fillna(x.median()) if x.notna().sum() > 0 else x) #besity_prevalence_percentage & diabetes_prevalence_percentage just have information until 2016
+            merged_df[col] = merged_df.groupby('Year')[col].transform(lambda x: x.fillna(x.median()) if x.notna().sum() > 0 else x)
 
-    log.info("Message2")
-    log.info(merged_df.isnull().sum()) 
-    
     merged_df['DeathRate'] = (merged_df['Cardiovascular'] / merged_df['population']) * 100000
-
+    
     result = {
-        "source":"merge_data",
+        "source": "merge_data",
         "data": merged_df.to_dict(orient='records')
     }
-
+    
     kwargs['ti'].xcom_push(key='data_merged', value=json.dumps(result))
 
     return json.dumps(result)
+
 
 
 def load_data(**kwargs):

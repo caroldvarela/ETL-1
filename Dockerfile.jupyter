@@ -3,6 +3,8 @@ FROM jupyter/base-notebook:latest
 
 # Cambiar al usuario root para instalar git
 USER root
+
+# Instala git y librerías necesarias para PostgreSQL
 RUN apt-get update && apt-get install -y git
 
 # Cambiar de nuevo al usuario jovyan

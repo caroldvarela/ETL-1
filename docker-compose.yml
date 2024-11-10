@@ -94,7 +94,7 @@ services:
   airflow-init:
     <<: *airflow-common
     container_name: airflow-init
-    command: version
+    command: db init
     environment:
       <<: *airflow-common-env
       _AIRFLOW_DB_MIGRATE: 'true'
