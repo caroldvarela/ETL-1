@@ -21,7 +21,7 @@ from etl import *
 default_args = {
     'owner': 'Airflow_proyecto',
     'depends_on_past': False,
-    'start_date': datetime(2024, 11, 8),
+    'start_date': datetime(2024, 11, 12),
     'email': ['airflow@example.com'],
     'email_on_failure': False,
     'email_on_retry': False,
