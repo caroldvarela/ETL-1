@@ -1,4 +1,4 @@
-# ETL Project - First delivery 
+# ETL Project 
 
 Presented by 
 - Jhonatan Steven Morales Hernandez: jhonatan.morales@uao.edu.co
@@ -56,21 +56,56 @@ This project is developed within a virtual machine running **Ubuntu**. The dashb
 - **PostgreSQL** <img src="https://cdn-icons-png.flaticon.com/128/5968/5968342.png" alt="Postgres" width="21px" height="21px">
 - **Power BI** <img src="https://1000logos.net/wp-content/uploads/2022/08/Microsoft-Power-BI-Logo.png" alt="PowerBI" width="30px" height="21px">
 - **SQLAlchemy** <img src="https://quintagroup.com/cms/python/images/sqlalchemy-logo.png/@@images/eca35254-a2db-47a8-850b-2678f7f8bc09.png" alt="SQLalchemy" width="50px" height="21px">
+- **Docker** <img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/docker-icon.png" alt="Docker" width="50px" height="21px">
 
 ### Repository Organization
 
-- **data:** This folder contains all the csv files 'cardio_train.csv' and 'cause_of_deaths.csv'
-- **notebooks:** This folder contains the exploratory data analysis and contains the notebook responsible for uploading the data.
-- **src:** This folder contains the code responsible for connecting to our database, as well as the models of the tables that we already mentioned.
+- **dags:** This folder includes DAG files necessary for orchestrating ETL workflows in Apache Airflow. It contains `__init__.py`, `dags.py`, and `etl.py`, which are essential for defining tasks and scheduling.
+
+- **data:** This folder holds the raw data files used in the project, including `cardio_train.csv`, `cause_of_deaths.csv`, and `owid.csv`. These files serve as the input data for analysis and model training.
+
+- **logs:** A folder containing log files that help in monitoring the workflow processes and identifying issues during execution. The `.gitkeep` file ensures that the folder is tracked by Git even when empty.
+
+- **notebooks:** This directory contains Jupyter notebooks used for exploratory data analysis (EDA) and other key processes:
+  - **EDA/002_EDA_dataset.ipynb** – Initial EDA for understanding the dataset.
+  - **005_EDA_API.ipynb** – EDA related to API data sources.
+  - **Great Expectations (GX)/006_great_expectations.ipynb** – Notebook for data validation using Great Expectations.
+  - **004_API.ipynb** – Notebook for merging data obtained from the API.
+  - **database_process/001_DataSetup.ipynb** – Notebook for setting up the database.
+  - **003_database_processed.ipynb** – Notebook documenting the data processing stage.
+
+- **gx:** This folder is dedicated to Great Expectations for data validation. It contains:
+  - **expectations** – JSON files like `cardio_train_expectations.json`, `cause_of_deaths_expectations.json`, and `owid_expectations.json` define the validation rules.
+  - **plugins/custom_data_docs/styles/data_docs_custom_styles.css** – Custom styles for the data documentation.
+  - **.ge_store_backend_id** and **great_expectations.yml** – Configuration files for managing expectations and storing metadata.
+
+- **src:** Contains core code for database interaction, models, and data validation:
+  - **database** – Code for database connection and table creation, including `dbconnection.py` and `createTable.py`.
+  - **gx_utils** – Contains `validation.py` for running data validations.
+  - **model** – Holds `models.py` and related files defining the data model structure.
+  - **streaming** – Code for data streaming operations, including `data_to_powerbi.py` and `kafka_utils.py`.
+  - **transform** – Code for data transformation, with scripts like `DimensionalModels.py` and `TransformData.py`.
+
+- **Dashboard-streaming.mp4 / Dashboard.pdf:** Visual materials showcasing the dashboard and how data is presented using streaming updates.
+
+- **Dockerfile / Dockerfile.jupyter:** Docker configuration files for setting up the environment, including Jupyter for development.
+
+- **Documentation.pdf:** Comprehensive documentation for the project, outlining methodologies and results.
+
+- **example_env:** A template environment file to guide users in setting up their environment variables.
+
+- **main.py:** The main script that acts as an entry point for the project.
+
+- **requirements.txt:** Lists all the dependencies needed to run the project.
+
+- **docker-compose.yml:** Configuration file for orchestrating multi-container Docker applications.
+
 
 ### Requirements
 1. Install Python : [Python Downloads](https://www.python.org/downloads/)
-2. Install PostgreSQL : [PostgreSQL Downloads](https://www.postgresql.org/download/)
-3. Install Power BI : [Install Power BI Desktop](https://www.microsoft.com/en-us/download/details.aspx?id=58494) 
-
+2. Install Power BI : [Install Power BI Desktop](https://www.microsoft.com/en-us/download/details.aspx?id=58494) 
 
 ## Notebooks
-
 
 ### 1. Data Migration
 
@@ -109,106 +144,65 @@ This project is developed within a virtual machine running **Ubuntu**. The dashb
     pip install -r requirements.txt
     ```
 
-## PostgresSQL
-
-- **Set Up PostgreSQL**  
-   Install and configure PostgreSQL:
-   ```bash
-   sudo apt update
-   sudo apt-get -y install postgresql postgresql-contrib
-   sudo service postgresql start
-   sudo apt-get install libpq-dev python3-dev
-
-- **Log in to PostgreSQL**  
-   Run the following commands to log in:
-   ```bash
-   sudo -i -u postgres
-   psql
-
-- **Create a New Database and User**  
-   Run the following SQL commands to create a new user and database:
-   ```sql
-   CREATE USER <your_user> WITH PASSWORD '<your_password>';
-   ALTER USER <your_user> WITH SUPERUSER;
-   CREATE DATABASE <your_db_name> OWNER <your_user>;
-   
-- **Configure PostgreSQL for External Access (Optional for PowerBI)**  
-   The PostgreSQL configuration files are generally located in `/etc/postgresql/{version}/main/`
-   Edit the `postgresql.conf` file to allow external connections
-   
-   ```bash
-   listen_addresses = '*'
-   ssl = off
-   
--  **Edit the pg_hba.conf File**  
-   Allow connections from your local IP by adding the following line:
-   ```plaintext
-   host    all             all             <your-ip>/32         md5
-
-- **Set Up pgAdmin 4 (Optional)**  
-   To install pgAdmin 4, run the following commands:
-   ```bash
-   sudo apt install curl
-   sudo curl https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo apt-key add
-   sudo sh -c 'echo "deb https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/$(lsb_release -cs) pgadmin4 main" > /etc/apt/sources.list.d/pgadmin4.list && apt update'
-   sudo apt install pgadmin4
-
 ## Configuration of the .env File
 
 - **Create a .env File**  
    Create a `.env` file with the following configuration:
    ```plaintext
+   # Airflow Configuration
+   AIRFLOW_UID=50000
+   AIRFLOW_GID=50000
+
+   # PostgreSQL Configuration
+   PGUSER=airflow
+   PGPASSWD=airflow
    PGDIALECT=postgresql
-   PGUSER=<your_user>
-   PGPASSWD=<your_password>
-   PGHOST=localhost
+   PGHOST=postgres
    PGPORT=5432
-   PGDB=<your_db_name>
-   WORK_DIR=<your_working_directory>
-   
-- `PGDIALECT` <- This variable specifies the dialect of PostgreSQL to be used in the connection.  
-- `PGUSER` <- Defines the username to be used for authenticating against the PostgreSQL database.  
-- `PGPASSWD` <- This variable stores the password associated with the PostgreSQL user for authentication.  
-- `PGHOST` <- Indicates the address of the PostgreSQL database server that the application will connect to.  
-- `PGPORT` <-  Specifies the port on which the PostgreSQL database server is listening.  
-- `PGDB` <- Defines the name of the database that the application will connect to.  
-- `WORK_DIR` <- Sets the working directory for the application, indicating the base path for performing operations and managing files.
+   PGDB=airflow
 
-## Airflow
+   # Kafka Configuration
+   KAFKA_BROKER=kafka:9092
 
- - **Create the Airflow Directory:**  
+   # Airflow Admin User
+   AIRFLOW_ADMIN_USER=admin
+   AIRFLOW_ADMIN_PASSWORD=admin
+   AIRFLOW_ADMIN_EMAIL=admin@example.com
+
+   # Power BI API URL (for data streaming)
+   POWERBI_API=<your_power_bi_api_url>
+
+   # Working Directory for Airflow
+   WORK_DIR=/opt/airflow
+
+# Steps to Run the Project
+
+1. **Start the Containers**
+   Run the following command to create and start the necessary Docker containers:
    ```bash
-   mkdir airflow
+   docker-compose up -d
    ```
+## Access Jupyter Notebook
 
- - **Set the Airflow Home Environment Variable:**  
-   ```bash
-   export AIRFLOW_HOME=~/airflow
-   ```
+1. Open your web browser and navigate to [http://localhost:8888](http://localhost:8888).
+2. Locate and open the notebook `003_database_processed.ipynb` located in the `database_process` folder.
+3. Run all the cells in the notebook to process the data and prepare the database.
 
- - **Configure the airflow.cfg File**  
-   The `airflow.cfg` file is located in the directory specified by `AIRFLOW_HOME`. To modify the `dags_folder`, set it to the path of your `dag.py` file:
-   ```ini
-   dags_folder = /path/to/your/dag
-   ```
+## Start Listening for Data Streaming
 
- - **Initialize the Airflow Database:**  
-   ```bash
-   airflow db init
-   ```
+1. Open a new terminal or command prompt window.
+2. Ensure that the streaming process is actively listening by running any necessary commands or scripts as specified in your project documentation.
 
- - **Start Airflow:**  
-   ```bash
-   airflow standalone
-   ```
-   
- - **Run the Airflow DAG**   
-   Navigate to the **Airflow UI**, enable the DAG, and trigger it manually.
-   
-You can now access the Airflow UI using the generated **credentials**.
+## Monitor Airflow
 
+1. Once the Jupyter Notebook is executed and the containers are running, navigate to [http://localhost:8080](http://localhost:8080) to access the Airflow web interface.
+2. Verify that the DAGs are running as expected and monitor the data processing workflow.
 
-You are now ready to start working on this workshop.
+## Completion and Observation
+
+1. Wait for Airflow to complete the data processing tasks. You can monitor the progress and logs directly in the Airflow interface.
+2. Once completed, you can proceed to validate the outputs or perform further analysis as needed.
+
 
 
 # Connect Power BI to PostgreSQL
