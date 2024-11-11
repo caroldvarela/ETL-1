@@ -1,3 +1,7 @@
+"""
+This code is based on the Our World In Data (owid) library
+"""
+
 from dataclasses import dataclass
 from typing import List, Optional
 

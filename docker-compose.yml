@@ -1,3 +1,4 @@
+
 x-airflow-common: &airflow-common
   build: .
   env_file:
@@ -25,36 +26,43 @@ x-airflow-common: &airflow-common
       condition: service_healthy
 
 
-
 services:
-  # Zookeeper Service
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    container_name: zookeeper
-    environment:
+  zookeeper: # First container (Service)
+    image: confluentinc/cp-zookeeper:latest  #zookeeper docker image
+    container_name: zookeeper #container name
+    environment: #Environment variables
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    ports:
+    ports: #maps port 2181 from the host to por 2181 inside the zookeeper container, allows to access zookeeper on port 2181 of your host machine
       - 2181:2181
 
   # Kafka Service
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    container_name: kafka
+  kafka: # Second container (Service)
+    image: confluentinc/cp-kafka:latest #latest version of kafka docker image
+    container_name: kafka #Name of the container
     depends_on:
-      - zookeeper
+      - zookeeper #depends on zookeeper so kafka will not start until zookeeper service is up and running
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT_INTERNAL:PLAINTEXT,PLAINTEXT_EXTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_INTERNAL://kafka:9092,PLAINTEXT_EXTERNAL://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT_INTERNAL://0.0.0.0:9092,PLAINTEXT_EXTERNAL://0.0.0.0:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     ports:
-      - 9092:9092
+      - "9092:9092"
+      - "9093:9093" # port to use to connect from kafka broker to local host port
+    expose:
+     - "9093"
+     - "9092"
 
   # PostgreSQL Service
   postgres:
     image: postgres:13
+    container_name: postgres 
     environment:
       POSTGRES_USER: ${PGUSER}
       POSTGRES_PASSWORD: ${PGPASSWD}
@@ -82,7 +90,7 @@ services:
       timeout: 10s
       retries: 5
     restart: always
-
+ 
   # Airflow Scheduler
   airflow-scheduler:
     <<: *airflow-common
@@ -101,9 +109,9 @@ services:
       _AIRFLOW_WWW_USER_CREATE: 'true'
       _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_ADMIN_USER:-admin}
       _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-admin}
-    restart: "no"  # Solo corre una vez para inicializar la base de datos
+    restart: "no"  # Run only once to initialize the database
 
-  # Monta todos los notebooks en un contenedor
+  # Mount all the notebooks in a container
   jupyter-notebook:
     build:
       context: .
@@ -128,3 +136,4 @@ services:
 volumes:
   postgres-db-volume:
     external: false
+

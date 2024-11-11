@@ -2,43 +2,43 @@ import great_expectations as gx
 import great_expectations.expectations as gxe
 import logging as log
 
-# Obtiene el contexto de Great Expectations
+# Get the context of Great Expectations
 def get_gx_context():
     return gx.get_context()
 
 
-# En validation.py
+# validation.py
 def validate_data(df, data_name, expectations):
     context = get_gx_context()
     
-    # Crear o cargar el data source y el asset
+    # Create or load the data source and the asset
     try:
         data_source = context.data_sources.get("pandas")
     except KeyError:
         data_source = context.data_sources.add_pandas("pandas")
     
-    # Crear o cargar el asset de datos
+    # Create or load the data asset
     try:
         data_asset = data_source.get_asset(name=data_name)
     except LookupError:
         data_asset = data_source.add_dataframe_asset(name=data_name)
     
-    # Definir el batch definition y obtener el batch
+    # Define the batch definition and retrieve the batch
     batch_definition = data_asset.add_batch_definition_whole_dataframe(f"batch_{data_name}")
     batch = batch_definition.get_batch(batch_parameters={"dataframe": df})
     
-    # Crear o cargar el Expectation Suite
+    # Create or load the Expectation Suite
     suite_name = f"{data_name}_expectations"
     try:
         expectation_suite = context.suites.get(suite_name)
     except gx.exceptions.DataContextError:
         expectation_suite = context.suites.add(gx.ExpectationSuite(name=suite_name))
     
-    # Añadir expectativas al suite
+    # Add expectations to the suite
     for expectation in expectations:
         expectation_suite.add_expectation(expectation)
     
-    # Validar y capturar el resultado
+    # Validate and capture the result
     validation_result = batch.validate(expectation_suite)
     if not validation_result["success"]:
         log.error(f"Validation failed for {data_name}")
@@ -52,7 +52,7 @@ def validate_data(df, data_name, expectations):
 
 
 
-# Especificar las expectativas para cada conjunto de datos
+# Specify the expectations for each dataset
 def validate_cardio_data(df):
     cardio_expectations = [
         gxe.ExpectTableColumnsToMatchOrderedList(
@@ -99,10 +99,10 @@ def validate_api_data(df):
         gxe.ExpectColumnValuesToBeBetween(column="diabetes_prevalence_percentage", min_value=1.8, max_value=31.3),
     ]
     
-    # Realiza la validación
+    # Perform the validation
     validation_result = validate_data(df, "owid_data", owid_expectations)
 
-    # Log del resultado en lugar de usar XCom
+    # Log the result instead of using XCom
     if not validation_result["success"]:
         log.error(f"Validation failed for owid_data")
         log.error("Detalles de la validación fallida:")

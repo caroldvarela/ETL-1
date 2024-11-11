@@ -17,7 +17,7 @@ from src.streaming.data_to_powerbi import send_to_powerbi
 def kafka_producer(data):
     producer = KafkaProducer(
         value_serializer=lambda m: dumps(m).encode('utf-8'),
-        bootstrap_servers=['localhost:9092'],
+        bootstrap_servers=['kafka:9092'],
     )
     
     for index in range(len(data)):
@@ -35,7 +35,7 @@ def kafka_consumer():
         enable_auto_commit=False,
         group_id='my-group-1',
         value_deserializer=lambda m: loads(m.decode('utf-8')),
-        bootstrap_servers=['localhost:9092']
+        bootstrap_servers=['localhost:9093']
     )
 
     try:

@@ -1,17 +1,17 @@
 # Dockerfile.jupyter
 FROM jupyter/base-notebook:latest
 
-# Cambiar al usuario root para instalar git
+# Switch to the root user to install git
 USER root
 
-# Instala git y librerías necesarias para PostgreSQL
+# Install git and the necessary libraries for PostgreSQL
 RUN apt-get update && apt-get install -y git
 
-# Cambiar de nuevo al usuario jovyan
+# Switch back to the jovyan user
 USER jovyan
 
-# Copia el archivo requirements.txt al contenedor
+# Copy the requirements.txt file to the container
 COPY requirements.txt /home/jovyan/work/requirements.txt
 
-# Instala los paquetes de Python como el usuario airflow
+# Install the Python packages as the airflow user
 RUN pip install --no-cache-dir -r /home/jovyan/work/requirements.txt

@@ -123,7 +123,7 @@ def extract_owid_data(**kwargs):
     return merged_df.to_json(orient='records')
 
 def validate_api(**kwargs):
-    log.info("Starting Data validate")
+    log.info("Starting Data API validate")
     ti = kwargs['ti']
     str_data = ti.xcom_pull(task_ids="extract_api", key='owid')
     if str_data is None:
@@ -132,7 +132,7 @@ def validate_api(**kwargs):
     json_df = json.loads(str_data)
     df = pd.json_normalize(data=json_df)
     
-    # Filtrado de datos
+    
     df = df[(df["Year"] >= 1990) & (df["Year"] <= 2019)]
     
     
@@ -150,9 +150,10 @@ def validate_api(**kwargs):
     ]
     df = df.reindex(columns=expected_columns)
     
-    # Validación con Great Expectations
+    # Validation with Great Expectations
     kwargs['ti'].xcom_push(key='owid_validate', value=df.to_json(orient='records'))
-    return validate_api_data(df)
+    validate_api_data(df)
+    return df.to_json(orient='records')
 
 
 
@@ -218,9 +219,15 @@ def validate_deaths(**kwargs):
     data = json.loads(json_data)
     df = pd.DataFrame(data["data"])
     
-    validate_deaths_data(df)  # Llamada a la validación desde gx_utils
-    kwargs['ti'].xcom_push(key='deaths_validated', value=df.to_json(orient='records'))
-    return df.to_json(orient='records')
+    validate_deaths_data(df)  # Call to validation from gx_utils
+
+    result = {
+            "source":"deaths",
+            "data": df.to_dict(orient='records')
+    }
+    kwargs['ti'].xcom_push(key='deaths_validated', value=json.dumps(result))
+
+    return json.dumps(result)
 
 
 
@@ -233,7 +240,7 @@ def merge(**kwargs):
     json_2 = ti.xcom_pull(task_ids="transform_api", key='owidtransform')
     json_1 = ti.xcom_pull(task_ids="validate_deaths_data", key='deaths_validated')
     
-    # Verifica si json_1 y json_2 son válidos
+    # Check if json_1 and json_2 are valid
     if json_1 is None:
         log.error("No data found in XCom for 'transform_cardio'")
         return
@@ -242,11 +249,11 @@ def merge(**kwargs):
         log.error("No data found in XCom for 'transform_deaths'")
         return
 
-    # Cargar los datos como JSON
+    # Load the data as JSON
     data1 = json.loads(json_1)
     data2 = json.loads(json_2)
 
-    # Asegurarse de que data1 y data2 tengan la clave 'data'
+    # Ensure that data1 and data2 have the 'data' key
     if not isinstance(data1, dict) or "data" not in data1:
         log.error(f"Unexpected structure for data1: {data1}")
         return
@@ -255,14 +262,16 @@ def merge(**kwargs):
         log.error(f"Unexpected structure for data2: {data2}")
         return
     
-    # Convertir a DataFrame
+    
     df1 = pd.DataFrame(data1["data"])
     df2 = pd.DataFrame(data2["data"])
 
     log.info(df1.columns)
     log.info(df2.columns)
+
+    df2.drop(columns=["Code", "CardiovascularDeaths", "TotalDeaths"], inplace=True)
     
-    # Realiza el merge y manipulación como antes
+    # Perform the merge and manipulation as before
     merged_df = pd.merge(df1, df2, left_on=['Country', 'Year'], right_on=['Country', 'Year'], how='left')
     
     log.info("Data merged successfully")

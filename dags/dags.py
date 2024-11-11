@@ -21,7 +21,7 @@ from etl import *
 default_args = {
     'owner': 'Airflow_proyecto',
     'depends_on_past': False,
-    'start_date': datetime(2024, 11, 12),
+    'start_date': datetime(2024, 11, 11),
     'email': ['airflow@example.com'],
     'email_on_failure': False,
     'email_on_retry': False,
@@ -42,7 +42,7 @@ with DAG(
         python_callable=extract_data_cardio,
     )
 
-    validate_cardio_data  = PythonOperator(
+    validate_cardios_data  = PythonOperator(
         task_id='validate_cardio_data',
         python_callable=validate_cardio,
     )
@@ -57,7 +57,7 @@ with DAG(
         python_callable=extract_data_deaths,
     )
 
-    validate_deaths_data  = PythonOperator(
+    validate_death_data  = PythonOperator(
         task_id='validate_deaths_data',
         python_callable=validate_deaths,
     )
@@ -66,7 +66,7 @@ with DAG(
         task_id='extract_api',
         python_callable=extract_owid_data,
     )
-    validate_api_data  = PythonOperator(
+    validate_owid_data  = PythonOperator(
         task_id='validate_api_data',
         python_callable=validate_api,
     )
@@ -92,6 +92,6 @@ with DAG(
 
     
 
-    extract_cardio >> validate_cardio_data >>transform_cardio >> load
-    extract_deaths >> validate_deaths_data >> Merge >> load 
-    extract_api >> validate_api_data >> transform_api >> Merge >> load >> producer
+    extract_cardio >> validate_cardios_data >>transform_cardio >> load
+    extract_deaths >> validate_death_data >> Merge >> load 
+    extract_api >> validate_owid_data >> transform_api >> Merge >> load >> producer

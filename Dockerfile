@@ -1,17 +1,17 @@
-# Usa la imagen de Airflow específica
+# Use the specific Airflow image
 FROM apache/airflow:2.5.1-python3.10
 
-# Cambia al usuario root para instalar dependencias del sistema
+# Switch to the root user to install system dependencies
 USER root
 
-# Instala git y librerías necesarias para PostgreSQL
+# Install Git and necessary libraries for PostgreSQL
 RUN apt-get update && apt-get install -y git libpq-dev && apt-get clean
 
-# Cambia de nuevo al usuario airflow para instalar las dependencias de Python
+# Switch back to the airflow user to install the Python dependencies
 USER airflow
 
-# Copia el archivo requirements.txt al contenedor
+# Copy the requirements.txt file to the container
 COPY requirements.txt /requirements.txt
 
-# Instala los paquetes de Python como el usuario airflow
+# Install the Python packages as the airflow user
 RUN pip install --no-cache-dir -r /requirements.txt
