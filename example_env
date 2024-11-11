@@ -1,0 +1,25 @@
+# Airflow Configuration
+AIRFLOW_UID=50000
+AIRFLOW_GID=50000
+
+# PostgreSQL Configuration
+PGUSER=airflow
+PGPASSWD=airflow
+PGDIALECT=postgresql
+PGHOST=postgres
+PGPORT=5432
+PGDB=airflow
+
+# Kafka Configuration
+KAFKA_BROKER=kafka:9092
+
+# Airflow Admin User
+AIRFLOW_ADMIN_USER=admin
+AIRFLOW_ADMIN_PASSWORD=admin
+AIRFLOW_ADMIN_EMAIL=admin@example.com
+
+# Power BI API URL (for data streaming)
+POWERBI_API=<tu_url_de_api_de_powerbi>
+
+# Working Directory for Airflow
+WORK_DIR=/opt/airflow

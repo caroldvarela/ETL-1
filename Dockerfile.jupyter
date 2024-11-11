@@ -1,0 +1,17 @@
+# Dockerfile.jupyter
+FROM jupyter/base-notebook:latest
+
+# Switch to the root user to install git
+USER root
+
+# Install git and the necessary libraries for PostgreSQL
+RUN apt-get update && apt-get install -y git
+
+# Switch back to the jovyan user
+USER jovyan
+
+# Copy the requirements.txt file to the container
+COPY requirements.txt /home/jovyan/work/requirements.txt
+
+# Install the Python packages as the airflow user
+RUN pip install --no-cache-dir -r /home/jovyan/work/requirements.txt

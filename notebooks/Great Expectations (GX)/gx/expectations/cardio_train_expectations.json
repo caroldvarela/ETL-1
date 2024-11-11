@@ -1,0 +1,80 @@
+{
+  "expectations": [
+    {
+      "id": "dc9adfff-382c-4740-a138-4ea7f8f37784",
+      "kwargs": {
+        "column_list": [
+          "id",
+          "age",
+          "gender",
+          "height",
+          "weight",
+          "ap_hi",
+          "ap_lo",
+          "cholesterol",
+          "gluc",
+          "smoke",
+          "alco",
+          "active",
+          "cardio"
+        ]
+      },
+      "meta": {},
+      "type": "expect_table_columns_to_match_ordered_list"
+    },
+    {
+      "id": "dbf6add0-23ee-4421-9345-d94aa6c0f9b5",
+      "kwargs": {
+        "column": "age",
+        "max_value": 23713.0,
+        "min_value": 10798.0
+      },
+      "meta": {},
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "e023fd02-78c0-46c1-b586-9001aca60b55",
+      "kwargs": {
+        "column": "height",
+        "max_value": 250.0,
+        "min_value": 55.0
+      },
+      "meta": {},
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "c944dcd9-0cbf-47a5-b562-7c0cf7b8340d",
+      "kwargs": {
+        "column": "weight",
+        "max_value": 200.0,
+        "min_value": 10.0
+      },
+      "meta": {},
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "9108fb29-d754-4f02-b0c8-95b8601c2a5a",
+      "kwargs": {
+        "column": "id",
+        "type_": "int"
+      },
+      "meta": {},
+      "type": "expect_column_values_to_be_of_type"
+    },
+    {
+      "id": "e8492f6a-7f5c-42e3-9762-bb5d39a6c754",
+      "kwargs": {
+        "column": "gender",
+        "type_": "int"
+      },
+      "meta": {},
+      "type": "expect_column_values_to_be_of_type"
+    }
+  ],
+  "id": "e11df749-25e7-4681-9ab6-97e4ec93b80b",
+  "meta": {
+    "great_expectations_version": "1.0.6"
+  },
+  "name": "cardio_train_expectations",
+  "notes": null
+}

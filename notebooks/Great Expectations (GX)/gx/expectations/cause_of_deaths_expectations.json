@@ -1,0 +1,55 @@
+{
+  "expectations": [
+    {
+      "id": "5d52e951-18c0-4a2b-9890-d42015df6b5d",
+      "kwargs": {
+        "column_list": [
+          "id",
+          "Country",
+          "Code",
+          "Year",
+          "Cardiovascular",
+          "TotalDeaths"
+        ]
+      },
+      "meta": {},
+      "type": "expect_table_columns_to_match_ordered_list"
+    },
+    {
+      "id": "40dadbff-4b4a-4660-9c66-d0a8249a08ab",
+      "kwargs": {
+        "column": "Year",
+        "max_value": 2019.0,
+        "min_value": 1990.0
+      },
+      "meta": {},
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "3b3c198e-8eba-461e-a9c3-4c5adc44e32f",
+      "kwargs": {
+        "column": "Cardiovascular",
+        "max_value": 4813486.65,
+        "min_value": 3.8
+      },
+      "meta": {},
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "e00e5729-6784-453c-80c1-73b47c6b95ee",
+      "kwargs": {
+        "column": "TotalDeaths",
+        "max_value": 10964688.0,
+        "min_value": 6.6499999999999995
+      },
+      "meta": {},
+      "type": "expect_column_values_to_be_between"
+    }
+  ],
+  "id": "311a4ef5-3749-4904-aec9-a2714762e4ac",
+  "meta": {
+    "great_expectations_version": "1.0.6"
+  },
+  "name": "cause_of_deaths_expectations",
+  "notes": null
+}

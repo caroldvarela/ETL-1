@@ -1,0 +1,84 @@
+{
+  "expectations": [
+    {
+      "id": "7f44ae45-a8b3-4035-a00e-853cd490aa85",
+      "kwargs": {
+        "column_list": [
+          "Country",
+          "Code",
+          "Year",
+          "CardiovascularDeaths",
+          "nitrogen_oxide(NOx)",
+          "sulphur_dioxide(SO2)",
+          "carbon_monoxide(CO)",
+          "black_carbon(BC)",
+          "ammonia(NH3)",
+          "non_methane_volatile_organic_compounds",
+          "gdp_per_capita",
+          "obesity_prevalence_percentage",
+          "diabetes_prevalence_percentage",
+          "population",
+          "TotalDeaths"
+        ]
+      },
+      "meta": {},
+      "type": "expect_table_columns_to_match_ordered_list"
+    },
+    {
+      "id": "d0972bb0-278f-431c-8d73-1e91a29cc7d8",
+      "kwargs": {
+        "column": "Year",
+        "max_value": 2019.0,
+        "min_value": 1990.0
+      },
+      "meta": {},
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "8762f27c-bc3e-4774-89b0-15fbd84e8c6f",
+      "kwargs": {
+        "column": "CardiovascularDeaths",
+        "max_value": 4813486.65,
+        "min_value": 3.8
+      },
+      "meta": {},
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "5331adb9-1be9-452a-a519-e6c191a84943",
+      "kwargs": {
+        "column": "gdp_per_capita",
+        "max_value": 177660.2835,
+        "min_value": 234.403
+      },
+      "meta": {},
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "507b4cdd-e403-4c31-a7d6-cea07b55f09d",
+      "kwargs": {
+        "column": "obesity_prevalence_percentage",
+        "max_value": 64.05,
+        "min_value": 0.285
+      },
+      "meta": {},
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "7d308d3f-c171-4c00-8dd2-6c2b8ad721fc",
+      "kwargs": {
+        "column": "diabetes_prevalence_percentage",
+        "max_value": 31.290000000000003,
+        "min_value": 1.805
+      },
+      "meta": {},
+      "type": "expect_column_values_to_be_between"
+    }
+  ],
+  "id": "2faaf6bf-9523-4f68-a43c-c51b3ea03c35",
+  "meta": {
+    "great_expectations_version": "1.0.6"
+  },
+  "name": "owid_expectations",
+  "notes": null
+}
