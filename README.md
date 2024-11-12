@@ -7,15 +7,28 @@ Presented by
 
 ## 📝 Introduction
 
-Exploratory Data Analysis (EDA) is a crucial step in any data science project, as it allows us to better understand the structure, relationships, and patterns within the data before conducting any advanced modeling or analysis.
+This project integrates various technologies to create a complete data pipeline, from data source collection to real-time visualization. It starts with the selection of **two data sources**: one from a **dataset** and another from an **external API**. The data is processed through an **Apache Airflow DAG**, which handles the **ETL tasks** and stores the resulting **dimensional model** in a database. The project also uses **Apache Kafka** for real-time streaming of metrics from the **fact table**, which are visualized in an interactive **dashboard** built with **Power BI**. To ensure real-time data flow, a **Python application** acts as a Kafka consumer.
+
+Additionally, the entire project is **dockerized** to ensure consistent deployment across environments, with all dependencies encapsulated in containers. This makes it easy to run the system on any machine with Docker, streamlining both the development and deployment processes.
+
+This project is developed within a virtual machine running **Ubuntu**.
+
+
+<p align="center">
+  <img src="https://github.com/caroldvarela/images/blob/main/Project-etl.png" alt="ETL Project Diagram" />
+</p>
+
 
 In this project, we will work with two main datasets:
 
 1. **💓 Cardio Train Dataset**: This dataset contains information on various health indicators of individuals, such as age, gender, height, weight, blood pressure, cholesterol levels, and more. The goal is to explore these data points to identify potential correlations and patterns that could be useful in predicting cardiovascular diseases.
    
 2. **⚠️ Cause Of Deaths**: This dataset provides information on causes of death at a global level, broken down by country and year. It records a wide range of diseases and conditions, such as meningitis, respiratory diseases, and various forms of cancer, among others. However, the main focus is on mortality associated with cardiovascular diseases.
+   
 
-#### Data Description
+## 📈 Data Description
+
+### **💓 Cardio Train Dataset:**
 
 The dataset is composed of three types of input features:
 
@@ -40,16 +53,37 @@ The dataset is composed of three types of input features:
 
 All dataset values were collected at the time of the medical examination.
 
-This project is developed within a virtual machine running **Ubuntu**. The dashboard has been created using Power BI on a Windows machine.
+### **⚠️ Cause Of Deaths:**
 
-### 🎯 Objectives of the ETL
+This dataset has 32 features, but the most important ones for this project are:
 
-- **📊 Understanding Data Distribution**: Analyze the distribution of individual variables to identify outliers, missing values, and understand the nature of the data.
-- **🔗 Exploring Relationships Between Variables**: Investigate possible correlations between different variables that might be useful for subsequent modeling.
-- **🔍 Identifying Patterns and Trends**: Search for patterns and trends in the data that could reveal relevant information for the project’s objectives.
-- **🛠️ Data Preparation**: Perform the necessary transformations to clean and prepare the data for analysis and modeling.
+| Feature                  | Variable               | Value Type                                           |
+|--------------------------|------------------------|------------------------------------------------------|
+| Country/Territory         | country                | String (Name of the Country/Territory)               |
+| Code                     | code                   | String (Country/Territory Code)                      |
+| Year                     | year                   | int (Year of the Incident)                           |
+| Cardiovascular Diseases   | cardio_diseases         | int (No. of People died from Cardiovascular Diseases) |
 
-### Tools used
+
+## 🎯 Objectives
+
+The main goal of this project is to integrate various technologies and tools to create a real-time data processing and visualization solution. The specific objectives are:
+
+1. **Integrate multiple data sources** 📊🔗: Select and combine data from a **dataset** and an **external API** to build a dimensional model. 
+
+2. **Design and execute an ETL pipeline with Airflow** 🔄⚙️: Create an **Apache Airflow DAG** to manage the **extract, transform, and load (ETL)** tasks, storing the resulting dimensional model in a database. 
+
+3. **Implement a real-time data streaming system** 🚀📡: Use **Apache Kafka** to stream real-time metrics from the **fact table** of the dimensional model and enable continuous data ingestion. 
+
+4. **Develop an interactive dashboard** 📊📈: Build a **real-time dashboard** using visualization tools like **Power BI** or **Looker Studio** to display the data processed through the ETL pipeline in Airflow. 
+
+5. **Create a Python app to consume real-time data** 🐍💻: Develop a **Python application** to act as a Kafka consumer, receiving and processing the streamed metrics in real time. 
+
+6. **Visualize data in real time** ⏱️📅: Connect the interactive dashboard with the Python app and Kafka consumer to provide a real-time data visualization of the streamed metrics. 
+
+7. **Dockerize the project** 🐳🔧: Containerize the entire project using **Docker** to ensure portability and ease of deployment across different environments. 
+
+## 🔧 Tools used
 
 - **Python** <img src="https://cdn-icons-png.flaticon.com/128/3098/3098090.png" alt="Python" width="21px" height="21px">
 - **Jupyter Notebooks** <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Jupyter_logo.svg/883px-Jupyter_logo.svg.png" alt="Jupyer" width="21px" height="21px">
@@ -58,7 +92,7 @@ This project is developed within a virtual machine running **Ubuntu**. The dashb
 - **SQLAlchemy** <img src="https://quintagroup.com/cms/python/images/sqlalchemy-logo.png/@@images/eca35254-a2db-47a8-850b-2678f7f8bc09.png" alt="SQLalchemy" width="50px" height="21px">
 - **Docker** <img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/docker-icon.png" alt="Docker" width="50px" height="21px">
 
-### Repository Organization
+## 📂 Repository Organization
 
 - **dags:** This folder includes DAG files necessary for orchestrating ETL workflows in Apache Airflow. It contains `__init__.py`, `dags.py`, and `etl.py`, which are essential for defining tasks and scheduling.
 
@@ -105,7 +139,7 @@ This project is developed within a virtual machine running **Ubuntu**. The dashb
 1. Install Python : [Python Downloads](https://www.python.org/downloads/)
 2. Install Power BI : [Install Power BI Desktop](https://www.microsoft.com/en-us/download/details.aspx?id=58494) 
 
-## Notebooks
+## 📒 Notebooks
 
 ### 1. Data Migration
 
@@ -122,7 +156,7 @@ This project is developed within a virtual machine running **Ubuntu**. The dashb
 - **File:** `Data_transformation.ipynb`
 - **Description:** Performs deeper data transformation, such as creating new columns (e.g., the `Hired` column) and categorizing technologies. The transformed data is loaded back into the database.
 
-## Setting Up the Environment
+## 🚀 Setting Up the Environment
 
 1. Clone this repository:
 
@@ -144,7 +178,7 @@ This project is developed within a virtual machine running **Ubuntu**. The dashb
     pip install -r requirements.txt
     ```
 
-## Configuration of the .env File
+## ⚙️ Configuration of the .env File
 
 - **Create a .env File**  
    Create a `.env` file with the following configuration:
@@ -175,41 +209,41 @@ This project is developed within a virtual machine running **Ubuntu**. The dashb
    # Working Directory for Airflow
    WORK_DIR=/opt/airflow
 
-# Steps to Run the Project
+## 🏃‍♂️ Steps to Run the Project
 
-1. **Start the Containers**
+### **Start the Containers**
    Run the following command to create and start the necessary Docker containers:
    ```bash
    docker-compose up -d
    ```
-## Access Jupyter Notebook
+### Access Jupyter Notebook
 
 1. Open your web browser and navigate to [http://localhost:8888](http://localhost:8888).
 2. Locate and open the notebook `003_database_processed.ipynb` located in the `database_process` folder.
 3. Run all the cells in the notebook to process the data and prepare the database.
 
-## Start Listening for Data Streaming
+### Start Listening for Data Streaming
 
 1. Open a new terminal or command prompt window.
 2. Ensure that the streaming process is actively listening by running any necessary commands or scripts as specified in your project documentation.
 
-## Monitor Airflow
+### Monitor Airflow
 
 1. Once the Jupyter Notebook is executed and the containers are running, navigate to [http://localhost:8080](http://localhost:8080) to access the Airflow web interface.
 2. Verify that the DAGs are running as expected and monitor the data processing workflow.
 
-## Completion and Observation
+### Completion and Observation
 
 1. Wait for Airflow to complete the data processing tasks. You can monitor the progress and logs directly in the Airflow interface.
 2. Once completed, you can proceed to validate the outputs or perform further analysis as needed.
 
 
 
-# Connect Power BI to PostgreSQL
+## 📊 Connect Power BI to PostgreSQL
 
 Do you want to create your own dashboard? You’ll probably need to do this:
 
-## Steps to Configure the Bridged Adapter
+### Steps to Configure the Bridged Adapter
 
 1. **Open VirtualBox:**
    - Start VirtualBox on your computer.
@@ -231,7 +265,7 @@ Do you want to create your own dashboard? You’ll probably need to do this:
 
 
 
-## Open Power BI
+## <img src="https://1000marcas.net/wp-content/uploads/2022/08/Microsoft-Power-BI-Logo.png" alt="PowerBI Logo" width="50" style="vertical-align: middle;"/> Open Power BI 
 
 7. **Start Power BI Desktop** on your Windows machine.
 
