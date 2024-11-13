@@ -55,7 +55,7 @@ All dataset values were collected at the time of the medical examination.
 
 ### **⚠️ Cause Of Deaths:**
 
-This dataset has 32 features, but the most important ones for this project are:
+This dataset originally had 32 features, but the ones selected for this project are:
 
 | Feature                  | Variable               | Value Type                                           |
 |--------------------------|------------------------|------------------------------------------------------|
@@ -135,27 +135,51 @@ The main goal of this project is to integrate various technologies and tools to 
 - **docker-compose.yml:** Configuration file for orchestrating multi-container Docker applications.
 
 
-### Requirements
+## 📝 Requirements
 1. Install Python : [Python Downloads](https://www.python.org/downloads/)
 2. Install Power BI : [Install Power BI Desktop](https://www.microsoft.com/en-us/download/details.aspx?id=58494) 
+3. Install Docker 
 
-## 📒 Notebooks
+### Installing Docker on Ubuntu <img src="https://upload.wikimedia.org/wikipedia/commons/7/79/Docker_%28container_engine%29_logo.png" alt="Docker Logo" width="70" style="vertical-align: middle;"/>
 
-### 1. Data Migration
 
-- **File:** `Data_Setup.ipynb`
-- **Description:** Imports the CSV file, transforms it, and migrates it to a relational PostgreSQL database using SQLAlchemy. In this step, the necessary tables are also created in the database.
+1. **Update your system**  
+   Update the package list and install available updates:
+   ```bash
+   sudo apt update && sudo apt upgrade -y
 
-### 2. Exploratory Data Analysis (EDA)
+2. **Install certificates and data transfer tool**  
+   Install the necessary certificates and curl for data transfer:
+   ```bash
+   sudo apt-get install ca-certificates curl
 
-- **File:** `EDA.ipynb`
-- **Description:** Performs exploratory analysis of the data loaded into the database. This includes identifying null values, reviewing data types, analyzing data distribution, and searching for patterns and correlations.
+3. **Create a secure directory for APT repository keys**  
+   Create a directory to store the repository keys:
+   ```sql
+   sudo install -m 0755 -d /etc/apt/keyrings
+   
+4. **Download and save the Docker GPG key to the system**  
+   Download the Docker GPG key and save it in the created directory:
+   
+   ```bash
+   sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+   
+5. **Grant read permissions to all users for the Docker GPG key**  
+   Allow all users to read the GPG key:
+   ```bash
+   sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-### 3. Data Transformation
-
-- **File:** `Data_transformation.ipynb`
-- **Description:** Performs deeper data transformation, such as creating new columns (e.g., the `Hired` column) and categorizing technologies. The transformed data is loaded back into the database.
-
+6. **Add the Docker repository and update the package list**  
+   Add the Docker repository to the APT sources and update the package list:
+   ```bash
+   echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+   sudo apt-get update
+   
+7. **Install Docker Engine, CLI, Containerd, Buildx, and Compose plugins**  
+   Install Docker and its necessary components:
+   ```bash
+   sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+   
 ## 🚀 Setting Up the Environment
 
 1. Clone this repository:
@@ -165,23 +189,10 @@ The main goal of this project is to integrate various technologies and tools to 
     cd ETL-1
     ```
 
-2.  Create a Virtual Environment:  
-
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate
-    ```
-    
-3. Install the Required Dependencies:
-
-    ```env
-    pip install -r requirements.txt
-    ```
-
-## ⚙️ Configuration of the .env File
+2. ⚙️ Configuration of the .env File
 
 - **Create a .env File**  
-   Create a `.env` file with the following configuration:
+   Create a `.env` file with the following configuration (you can refer to the `example_env` file):
    ```plaintext
    # Airflow Configuration
    AIRFLOW_UID=50000
@@ -211,10 +222,16 @@ The main goal of this project is to integrate various technologies and tools to 
 
 ## 🏃‍♂️ Steps to Run the Project
 
+### **Adjust Permissions for Log Directory**
+  This command changes the ownership of the `./logs` directory to ensure Docker has proper access to the log files.
+  ```bash
+   sudo chown -R 50000:50000 ./logs
+   ```
+
 ### **Start the Containers**
    Run the following command to create and start the necessary Docker containers:
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 ### Access Jupyter Notebook
 
@@ -226,6 +243,9 @@ The main goal of this project is to integrate various technologies and tools to 
 
 1. Open a new terminal or command prompt window.
 2. Ensure that the streaming process is actively listening by running any necessary commands or scripts as specified in your project documentation.
+   ```bash
+   python main.py
+   ```
 
 ### Monitor Airflow
 
@@ -239,54 +259,28 @@ The main goal of this project is to integrate various technologies and tools to 
 
 
 
-## 📊 Connect Power BI to PostgreSQL
+## <img src="https://1000marcas.net/wp-content/uploads/2022/08/Microsoft-Power-BI-Logo.png" alt="PowerBI Logo" width="50" style="vertical-align: middle;"/> Power BI 
 
-Do you want to create your own dashboard? You’ll probably need to do this:
+1. **Start Power BI Desktop** on your Windows machine.
 
-### Steps to Configure the Bridged Adapter
-
-1. **Open VirtualBox:**
-   - Start VirtualBox on your computer.
-
-2. **Select the Virtual Machine:**
-   - From the list of virtual machines, select the one you want to configure.
-
-3. **Open Settings:**
-   - Click the "Settings" button (the gear icon) at the top.
-
-4. **Go to the Network Tab:**
-   - In the settings window, select the "Network" tab.
-
-5. **Enable the Adapter:**
-   - Check the box "Enable Network Adapter."
-
-6. **Select the Adapter Type:**
-   - In the "Attached to" field, select "Bridged Adapter."
-
-
-
-## <img src="https://1000marcas.net/wp-content/uploads/2022/08/Microsoft-Power-BI-Logo.png" alt="PowerBI Logo" width="50" style="vertical-align: middle;"/> Open Power BI 
-
-7. **Start Power BI Desktop** on your Windows machine.
-
-8. **Get Data:**
+2. **Get Data:**
    - On the home screen, click "Get Data."
      
    ![image](https://github.com/caroldvarela/images/blob/main/Dashboard_1.png)
-9. **Select PostgreSQL:**
+3. **Select PostgreSQL:**
    - In the "Get Data" window, choose "PostgreSQL Database" and click "Connect."
 
    ![image](https://github.com/caroldvarela/images/blob/main/Dashboard_2.png)
-10. **Configure the Connection:**
+4. **Configure the Connection:**
     - In the connection dialog, enter the following information:
       - **Server:** `server_ip:port` (by default, `localhost:5432` if connecting to your local machine).
       - **Database:** The name of the database you want to connect to.
    ![image](https://github.com/caroldvarela/images/blob/main/workshop2-1.png)
 
-11. **Authentication:**
+5. **Authentication:**
     - Select the authentication method "Database" and enter your PostgreSQL username and password.
    ![image](https://github.com/caroldvarela/images/blob/main/workshop2-2.png)
-12. **Load Data:**
+6. **Load Data:**
     - Click "Connect" and if the connection is successful, you will see the available tables in your database. Select the tables you want to import and click "Load."
    - Once your data is loaded into Power BI, you can start creating visualizations. Drag and drop fields from your tables onto the report canvas to create charts, tables, and other visual elements.
    - Customize the layout and design of your dashboard. Add filters, slicers, and interactive elements to make your dashboard informative and user-friendly.
