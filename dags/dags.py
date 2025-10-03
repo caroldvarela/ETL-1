@@ -85,13 +85,6 @@ with DAG(
         python_callable=load_data,
     )
 
-    producer = PythonOperator(
-        task_id='producer',
-        python_callable=producer_kafka,
-    )
-
-    
-
     extract_cardio >> validate_cardios_data >>transform_cardio >> load
     extract_deaths >> validate_death_data >> Merge >> load 
-    extract_api >> validate_owid_data >> transform_api >> Merge >> load >> producer
+    extract_api >> validate_owid_data >> transform_api >> Merge >> load
